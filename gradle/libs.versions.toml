@@ -1,0 +1,13 @@
+[versions]
+kotlin = "2.0.20"
+shadow = "8.3.3"
+simplecloud-controller = "0.0.28-EXPERIMENTAL"
+
+[libraries]
+kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+simplecloud-controller = { module = "app.simplecloud.controller:controller-api", version.ref = "simplecloud-controller"}
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
