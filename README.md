@@ -1,2 +1,2 @@
-# template-gradle
-The default simplecloud gradle setup.
+# command-plugin
+Ingame plugin to controll the cloud.

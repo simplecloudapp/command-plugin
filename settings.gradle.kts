@@ -12,8 +12,10 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
 }
 
-//TODO: Rename root project
-rootProject.name = "template-gradle"
+rootProject.name = "command-plugin"
 
-//TODO: Rename sub projects
-include("template-gradle-main", "template-gradle-shared")
+include(
+    "command-shared",
+    "command-velocity", 
+    "command-bungeecord", 
+)

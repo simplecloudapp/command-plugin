@@ -9,8 +9,7 @@ plugins {
 }
 
 allprojects {
-    //TODO: Rename group
-    group = "app.simplecloud.template"
+    group = "app.simplecloud.plugin.command"
     version = "0.0.1-EXPERIMENTAL"
 
     repositories {
@@ -52,8 +51,7 @@ subprojects {
     tasks.named("shadowJar", ShadowJar::class) {
         dependsOn("processResources")
         dependencies {
-            //TODO: Replace this with the renamed shared module
-            include(project(":template-gradle-shared"))
+            include(project(":command-shared"))
             /**
              * TODO: Add dependencies ADDED BY YOU like this:
              * include(dependency(libs.your.dependency.get()))
