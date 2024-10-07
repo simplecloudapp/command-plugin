@@ -1,13 +1,21 @@
 [versions]
 kotlin = "2.0.20"
 shadow = "8.3.3"
+kapt = "2.0.20"
 simplecloud-controller = "0.0.28-EXPERIMENTAL"
+cloud-core = "2.0.0"
+cloud-velocity = "2.0.0-beta.10"
+velocity = "3.4.0-SNAPSHOT"
 
 [libraries]
 kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 simplecloud-controller = { module = "app.simplecloud.controller:controller-api", version.ref = "simplecloud-controller"}
+cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud-core" }
+cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud-velocity" }
+velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kapt" }

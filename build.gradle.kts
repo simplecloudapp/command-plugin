@@ -1,10 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.kotlin.config.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.shadow)
+    alias(libs.plugins.kapt)
     `maven-publish`
 }
 
@@ -15,12 +14,14 @@ allprojects {
     repositories {
         mavenCentral()
         maven("https://buf.build/gen/maven")
+        maven("https://repo.papermc.io/repository/maven-public/")
     }
 }
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "com.gradleup.shadow")
+    apply(plugin = "org.jetbrains.kotlin.kapt")
     apply(plugin = "maven-publish")
 
     dependencies {
@@ -52,20 +53,27 @@ subprojects {
         dependsOn("processResources")
         dependencies {
             include(project(":command-shared"))
+
             /**
              * TODO: Add dependencies ADDED BY YOU like this:
              * include(dependency(libs.your.dependency.get()))
              */
+            include(dependency(libs.cloud.core.get()))
+            // TODO: only include the velocity dependency in the velocity plugin
+            include(dependency(libs.cloud.velocity.get()))
+
         }
         archiveFileName.set("${project.name}.jar")
     }
+}
 
-    tasks.test {
-        useJUnitPlatform()
-    }
+tasks.test {
+    useJUnitPlatform()
+}
 
-    tasks.processResources {
-        expand("version" to project.version,
-            "name" to project.name)
-    }
+tasks.processResources {
+    expand(
+        "version" to project.version,
+        "name" to project.name
+    )
 }
