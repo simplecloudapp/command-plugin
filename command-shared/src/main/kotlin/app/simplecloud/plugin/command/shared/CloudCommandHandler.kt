@@ -10,9 +10,22 @@ class CloudCommandHandler<C : Any>(
     private val commandManager: CommandManager<C>
 ) {
 
-    fun createCloudCommand() {
-        val controllerApi = ControllerApi.create()
+    private val controllerApi = ControllerApi.create()
 
+    fun createCloudCommand() {
+        commandManager.command(
+            commandManager.commandBuilder("cloud")
+                .handler { context: CommandContext<C> -> println("Cloud command executed") }
+                .build()
+        )
+
+        registerStartCommand()
+        registerStopCommand()
+        registerGetServersCommand()
+        registerGetGroupsCommand()
+    }
+
+    private fun registerStartCommand() {
         commandManager.command(
             commandManager.commandBuilder("cloud")
                 .literal("start")
@@ -22,6 +35,13 @@ class CloudCommandHandler<C : Any>(
                     println("Starting service from group $group")
                     controllerApi.getServers().startServer(group)
                 }
+                .build()
+        )
+    }
+
+    private fun registerStopCommand() {
+        commandManager.command(
+            commandManager.commandBuilder("cloud")
                 .literal("stop")
                 .required("group", stringParser())
                 .required("id", longParser())
@@ -31,6 +51,13 @@ class CloudCommandHandler<C : Any>(
                     println("Stopping service with ID $id from group $group")
                     controllerApi.getServers().stopServer(group, id)
                 }
+                .build()
+        )
+    }
+
+    private fun registerGetServersCommand() {
+        commandManager.command(
+            commandManager.commandBuilder("cloud")
                 .literal("get")
                 .literal("servers", "server")
                 .optional("group", stringParser())
@@ -42,6 +69,9 @@ class CloudCommandHandler<C : Any>(
                     when {
                         group != null && id != null -> {
                             println("Getting server with ID $id from group $group")
+                            controllerApi.getServers().getServerByNumerical(group, id).thenAccept { server ->
+                                println("Group: ${server.group}")
+                            }
                         }
                         group != null -> {
                             println("Getting servers from group $group")
@@ -60,6 +90,14 @@ class CloudCommandHandler<C : Any>(
                         }
                     }
                 }
+                .build()
+        )
+    }
+
+    private fun registerGetGroupsCommand() {
+        commandManager.command(
+            commandManager.commandBuilder("cloud")
+                .literal("get")
                 .literal("groups", "group")
                 .optional("group", stringParser())
                 .handler { context: CommandContext<C> ->
@@ -79,6 +117,5 @@ class CloudCommandHandler<C : Any>(
                 }
                 .build()
         )
-        println("Registered cloud command")
     }
 }
