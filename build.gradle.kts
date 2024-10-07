@@ -50,7 +50,10 @@ subprojects {
     }
 
     tasks.named("shadowJar", ShadowJar::class) {
-        dependsOn("processResources")
+        dependencies {
+            exclude(dependency("com.velocitypowered:velocity-api"))
+        }
+       /* dependsOn("processResources")
         dependencies {
             include(project(":command-shared"))
 
@@ -62,7 +65,7 @@ subprojects {
             // TODO: only include the velocity dependency in the velocity plugin
             include(dependency(libs.cloud.velocity.get()))
 
-        }
+        } */
         archiveFileName.set("${project.name}.jar")
     }
 }
