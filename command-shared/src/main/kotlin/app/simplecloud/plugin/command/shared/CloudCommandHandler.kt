@@ -6,7 +6,7 @@ import org.incendo.cloud.context.CommandContext
 import org.incendo.cloud.parser.standard.LongParser.longParser
 import org.incendo.cloud.parser.standard.StringParser.stringParser
 
-class CloudCommandHandler<C : Any>(
+class CloudCommandHandler<C : CloudSender>(
     private val commandManager: CommandManager<C>
 ) {
 
@@ -32,7 +32,7 @@ class CloudCommandHandler<C : Any>(
                 .required("group", stringParser())
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
-                    println("Starting service from group $group")
+                    context.sender().sendMessage("Starting service from group $group")
                     controllerApi.getServers().startServer(group)
                 }
                 .build()
@@ -48,7 +48,7 @@ class CloudCommandHandler<C : Any>(
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
                     val id = context.get<Long>("id")
-                    println("Stopping service with ID $id from group $group")
+                    context.sender().sendMessage("Stopping service with ID $id from group $group")
                     controllerApi.getServers().stopServer(group, id)
                 }
                 .build()
@@ -68,16 +68,15 @@ class CloudCommandHandler<C : Any>(
 
                     when {
                         group != null && id != null -> {
-                            println("Getting server with ID $id from group $group")
                             controllerApi.getServers().getServerByNumerical(group, id).thenAccept { server ->
-                                println("Group: ${server.group}")
+                                context.sender().sendMessage("Server: ${server.group}")
                             }
                         }
                         group != null -> {
                             println("Getting servers from group $group")
                             controllerApi.getServers().getServersByGroup(group).thenAccept { servers ->
                                 servers.forEach { server ->
-                                    println("Group: ${server.group}")
+                                    context.sender().sendMessage("Server: ${server.group}")
                                 }
                             }
                         }
@@ -86,7 +85,11 @@ class CloudCommandHandler<C : Any>(
                         }
                         else -> {
                             println("Getting all servers.")
-                            controllerApi.getServers().getAllServers().thenAccept(::println)
+                            controllerApi.getServers().getAllServers().thenAccept { servers ->
+                                servers.forEach { server ->
+                                    context.sender().sendMessage("Server: ${server.group}")
+                                }
+                            }
                         }
                     }
                 }
@@ -103,14 +106,13 @@ class CloudCommandHandler<C : Any>(
                 .handler { context: CommandContext<C> ->
                     val groupName = context.get<String>("group")
                     if (groupName != null) {
-                        println("Getting group $groupName")
                         controllerApi.getGroups().getGroupByName(groupName).thenAccept { group ->
-                            println("Group: ${group.name}")
+                            context.sender().sendMessage("Group: ${group.name}")
                         }
                     } else {
                         controllerApi.getGroups().getAllGroups().thenAccept { groups ->
                             groups.forEach { group ->
-                                println("Group: ${group.name}")
+                                context.sender().sendMessage("Group: ${group.name}")
                             }
                         }
                     }
