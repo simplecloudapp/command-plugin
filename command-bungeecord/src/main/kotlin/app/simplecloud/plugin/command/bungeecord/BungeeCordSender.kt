@@ -8,6 +8,10 @@ import net.md_5.bungee.api.CommandSender
  */
 class BungeeCordSender(private val commandSender: CommandSender): CloudSender {
 
+    fun getCommandSender(): CommandSender {
+        return commandSender
+    }
+
     override fun sendMessage(message: String) {
         commandSender.sendMessage(message)
     }

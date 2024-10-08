@@ -7,7 +7,11 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 /**
  * @author Fynn Bauer in 2024
  */
-class VelocitySender(private val commandSource: CommandSource): CloudSender {
+class VelocitySender(private val commandSource: CommandSource) : CloudSender {
+
+    fun getCommandSource(): CommandSource {
+        return commandSource
+    }
 
     override fun sendMessage(message: String) {
         commandSource.sendMessage(MiniMessage.miniMessage().deserialize(message))

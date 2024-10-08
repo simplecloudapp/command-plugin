@@ -1,6 +1,7 @@
 package app.simplecloud.plugin.command.velocity
 
 import app.simplecloud.plugin.command.shared.CloudCommandHandler
+import app.simplecloud.plugin.command.shared.CloudSender
 import com.google.inject.Inject
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
@@ -22,17 +23,22 @@ class VelocityPlugin @Inject constructor(
     private val pluginContainer: PluginContainer
 ) {
 
-    private lateinit var commandManager: VelocityCommandManager<CommandSource>
+    private lateinit var commandManager: VelocityCommandManager<CloudSender>
 
     @Subscribe
     fun onProxyInitialization(event: ProxyInitializeEvent) {
-        val executionCoordinator = ExecutionCoordinator.simpleCoordinator<CommandSource>()
+        val executionCoordinator = ExecutionCoordinator.simpleCoordinator<CloudSender>()
+
+        val senderMapper = SenderMapper.create<CommandSource, CloudSender>(
+            { commandSender -> VelocitySender(commandSender) },
+            { cloudSender -> (cloudSender as VelocitySender).getCommandSource() }
+        )
 
         commandManager = VelocityCommandManager(
             pluginContainer,
             server,
             executionCoordinator,
-            SenderMapper.identity()
+            senderMapper
         )
 
         val cloudCommandHandler = CloudCommandHandler(commandManager)
