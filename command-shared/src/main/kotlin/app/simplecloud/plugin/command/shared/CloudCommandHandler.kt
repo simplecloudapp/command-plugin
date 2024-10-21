@@ -5,17 +5,19 @@ import org.incendo.cloud.CommandManager
 import org.incendo.cloud.context.CommandContext
 import org.incendo.cloud.parser.standard.LongParser.longParser
 import org.incendo.cloud.parser.standard.StringParser.stringParser
+import org.incendo.cloud.suggestion.Suggestion
+import org.incendo.cloud.suggestion.SuggestionProvider
 
 class CloudCommandHandler<C : CloudSender>(
     private val commandManager: CommandManager<C>
 ) {
 
-    private val controllerApi = ControllerApi.create()
+    private val controllerApi = ControllerApi.createFutureApi()
 
     fun createCloudCommand() {
         commandManager.command(
             commandManager.commandBuilder("cloud")
-                .handler { context: CommandContext<C> -> println("Cloud command executed") }
+                .handler { _: CommandContext<C> -> println("Cloud command executed") }
                 .build()
         )
 
@@ -29,7 +31,15 @@ class CloudCommandHandler<C : CloudSender>(
         commandManager.command(
             commandManager.commandBuilder("cloud")
                 .literal("start")
-                .required("group", stringParser())
+                .required(
+                    "group",
+                    stringParser(),
+                    SuggestionProvider { _, _ ->
+                        controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                            groups.map { group -> Suggestion.suggestion(group.name) }
+                        }
+                    }
+                )
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
                     context.sender().sendMessage("Starting service from group $group")
@@ -43,8 +53,16 @@ class CloudCommandHandler<C : CloudSender>(
         commandManager.command(
             commandManager.commandBuilder("cloud")
                 .literal("stop")
-                .required("group", stringParser())
-                .required("id", longParser())
+                .required("group", stringParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                        groups.map { group -> Suggestion.suggestion(group.name) }
+                    }
+                })
+                .required("id", longParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getServers().getAllServers().thenApply { servers ->
+                        servers.map { server -> Suggestion.suggestion(server.numericalId.toString()) }
+                    }
+                })
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
                     val id = context.get<Long>("id")
@@ -60,8 +78,16 @@ class CloudCommandHandler<C : CloudSender>(
             commandManager.commandBuilder("cloud")
                 .literal("get")
                 .literal("servers", "server")
-                .optional("group", stringParser())
-                .optional("id", longParser())
+                .optional("group", stringParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                        groups.map { group -> Suggestion.suggestion(group.name) }
+                    }
+                })
+                .optional("id", longParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getServers().getAllServers().thenApply { servers ->
+                        servers.map { server -> Suggestion.suggestion(server.numericalId.toString()) }
+                    }
+                })
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
                     val id = context.get<Long>("id")
@@ -102,7 +128,11 @@ class CloudCommandHandler<C : CloudSender>(
             commandManager.commandBuilder("cloud")
                 .literal("get")
                 .literal("groups", "group")
-                .optional("group", stringParser())
+                .optional("group", stringParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                        groups.map { group -> Suggestion.suggestion(group.name) }
+                    }
+                })
                 .handler { context: CommandContext<C> ->
                     val groupName = context.get<String>("group")
                     if (groupName != null) {

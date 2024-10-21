@@ -2,7 +2,7 @@
 kotlin = "2.0.20"
 shadow = "8.3.3"
 kapt = "2.0.20"
-simplecloud-controller = "0.0.29-EXPERIMENTAL"
+simplecloud-controller = "0.0.30-EXPERIMENTAL"
 cloud-core = "2.0.0"
 cloud-velocity = "2.0.0-beta.10"
 cloud-bungeecord = "2.0.0-beta.10"
