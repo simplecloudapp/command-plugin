@@ -89,18 +89,18 @@ class CloudCommandHandler<C : CloudSender>(
                     }
                 })
                 .handler { context: CommandContext<C> ->
-                    val group = context.get<String>("group")
-                    val id = context.get<Long>("id")
+                    val groupName = context.getOrDefault("group", null as String?)
+                    val id = context.getOrDefault("id", null as Long?)
 
                     when {
-                        group != null && id != null -> {
-                            controllerApi.getServers().getServerByNumerical(group, id).thenAccept { server ->
+                        groupName != null && id != null -> {
+                            controllerApi.getServers().getServerByNumerical(groupName, id).thenAccept { server ->
                                 context.sender().sendMessage("Server: ${server.group}")
                             }
                         }
-                        group != null -> {
-                            println("Getting servers from group $group")
-                            controllerApi.getServers().getServersByGroup(group).thenAccept { servers ->
+                        groupName != null -> {
+                            println("Getting servers from group $groupName")
+                            controllerApi.getServers().getServersByGroup(groupName).thenAccept { servers ->
                                 servers.forEach { server ->
                                     context.sender().sendMessage("Server: ${server.group}")
                                 }
@@ -134,7 +134,7 @@ class CloudCommandHandler<C : CloudSender>(
                     }
                 })
                 .handler { context: CommandContext<C> ->
-                    val groupName = context.get<String>("group")
+                    val groupName = context.getOrDefault("group", null as String?)
                     if (groupName != null) {
                         controllerApi.getGroups().getGroupByName(groupName).thenAccept { group ->
                             context.sender().sendMessage("Group: ${group.name}")

@@ -17,7 +17,7 @@ import org.incendo.cloud.velocity.VelocityCommandManager
  * @author Fynn Bauer in 2024
  */
 
-@Plugin(id = "command-plugin", name = "SimpleCloud Command Plugin", version = "0.0.1-EXPERIMENTAL")
+@Plugin(id = "command-plugin", name = "SimpleCloud Command Plugin", authors = ["Kaseax"], version = "0.0.1-EXPERIMENTAL")
 class VelocityPlugin @Inject constructor(
     private val server: ProxyServer,
     private val pluginContainer: PluginContainer
