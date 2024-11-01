@@ -5,6 +5,7 @@ import org.incendo.cloud.CommandManager
 import org.incendo.cloud.context.CommandContext
 import org.incendo.cloud.parser.standard.LongParser.longParser
 import org.incendo.cloud.parser.standard.StringParser.stringParser
+import org.incendo.cloud.permission.Permission
 import org.incendo.cloud.suggestion.Suggestion
 import org.incendo.cloud.suggestion.SuggestionProvider
 
@@ -18,6 +19,7 @@ class CloudCommandHandler<C : CloudSender>(
         commandManager.command(
             commandManager.commandBuilder("cloud")
                 .handler { _: CommandContext<C> -> println("Cloud command executed") }
+                .permission(Permission.permission("simplecloud.command.cloud"))
                 .build()
         )
 
@@ -45,6 +47,7 @@ class CloudCommandHandler<C : CloudSender>(
                     context.sender().sendMessage("Starting service from group $group")
                     controllerApi.getServers().startServer(group)
                 }
+                .permission(Permission.permission("simplecloud.command.cloud.start"))
                 .build()
         )
     }
@@ -69,6 +72,7 @@ class CloudCommandHandler<C : CloudSender>(
                     context.sender().sendMessage("Stopping service with ID $id from group $group")
                     controllerApi.getServers().stopServer(group, id)
                 }
+                .permission(Permission.permission("simplecloud.command.cloud.stop"))
                 .build()
         )
     }
@@ -119,6 +123,7 @@ class CloudCommandHandler<C : CloudSender>(
                         }
                     }
                 }
+                .permission(Permission.permission("simplecloud.command.cloud.get.servers"))
                 .build()
         )
     }
@@ -147,6 +152,7 @@ class CloudCommandHandler<C : CloudSender>(
                         }
                     }
                 }
+                .permission(Permission.permission("simplecloud.command.cloud.get.groups"))
                 .build()
         )
     }
