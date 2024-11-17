@@ -10,7 +10,8 @@ import org.incendo.cloud.suggestion.Suggestion
 import org.incendo.cloud.suggestion.SuggestionProvider
 
 class CloudCommandHandler<C : CloudSender>(
-    private val commandManager: CommandManager<C>
+    private val commandManager: CommandManager<C>,
+    val commandPlugin: CommandPlugin
 ) {
 
     private val controllerApi = ControllerApi.createFutureApi()
@@ -44,7 +45,7 @@ class CloudCommandHandler<C : CloudSender>(
                 )
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
-                    context.sender().sendMessage("Starting service from group $group")
+                    context.sender().sendMessage(commandPlugin.messageConfiguration.startingService + group)
                     controllerApi.getServers().startServer(group)
                 }
                 .permission(Permission.permission("simplecloud.command.cloud.start"))
@@ -69,7 +70,9 @@ class CloudCommandHandler<C : CloudSender>(
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
                     val id = context.get<Long>("id")
-                    context.sender().sendMessage("Stopping service with ID $id from group $group")
+
+                    // TODO: provide id in the message
+                    context.sender().sendMessage(commandPlugin.messageConfiguration.stoppingService + group)
                     controllerApi.getServers().stopServer(group, id)
                 }
                 .permission(Permission.permission("simplecloud.command.cloud.stop"))
