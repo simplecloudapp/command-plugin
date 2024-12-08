@@ -26,8 +26,8 @@ class CloudCommandHandler<C : CloudSender>(
 
         registerStartCommand()
         registerStopCommand()
-        registerGetServersCommand()
-        registerGetGroupsCommand()
+        registerServerInfoCommand()
+        registerGroupInfoCommand()
     }
 
     private fun registerStartCommand() {
@@ -80,10 +80,10 @@ class CloudCommandHandler<C : CloudSender>(
         )
     }
 
-    private fun registerGetServersCommand() {
+    private fun registerServerInfoCommand() {
         commandManager.command(
             commandManager.commandBuilder("cloud")
-                .literal("get")
+                .literal("info", "get")
                 .literal("servers", "server")
                 .optional("group", stringParser(), SuggestionProvider { _, _ ->
                     controllerApi.getGroups().getAllGroups().thenApply { groups ->
@@ -131,10 +131,10 @@ class CloudCommandHandler<C : CloudSender>(
         )
     }
 
-    private fun registerGetGroupsCommand() {
+    private fun registerGroupInfoCommand() {
         commandManager.command(
             commandManager.commandBuilder("cloud")
-                .literal("get")
+                .literal("info", "get")
                 .literal("groups", "group")
                 .optional("group", stringParser(), SuggestionProvider { _, _ ->
                     controllerApi.getGroups().getAllGroups().thenApply { groups ->
