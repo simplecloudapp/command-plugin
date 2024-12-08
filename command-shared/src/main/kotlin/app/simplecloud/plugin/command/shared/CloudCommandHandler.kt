@@ -159,4 +159,25 @@ class CloudCommandHandler<C : CloudSender>(
                 .build()
         )
     }
+
+    private fun deleteGroupCommand() {
+        commandManager.command(
+            commandManager.commandBuilder("cloud")
+                .literal("delete")
+                .literal("group")
+                .required("group", stringParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                        groups.map { group -> Suggestion.suggestion(group.name) }
+                    }
+                })
+                .handler { context: CommandContext<C> ->
+                    val group = context.get<String>("group")
+
+                    context.sender().sendMessage(commandPlugin.messageConfiguration.stoppingService + group)
+                    controllerApi.getGroups().deleteGroup(group);
+                }
+                .permission(Permission.permission("simplecloud.command.cloud.delete.group"))
+                .build()
+        )
+    }
 }
