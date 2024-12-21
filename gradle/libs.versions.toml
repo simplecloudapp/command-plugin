@@ -8,6 +8,8 @@ cloud-velocity = "2.0.0-beta.10"
 cloud-bungeecord = "2.0.0-beta.10"
 velocity = "3.4.0-SNAPSHOT"
 bungeecord-api = "1.21-R0.1-SNAPSHOT"
+adventure-api = "4.17.0"
+adventure-text-minimessage = "4.17.0"
 
 [libraries]
 kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
@@ -18,6 +20,8 @@ cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud-v
 cloud-bungeecord = { module = "org.incendo:cloud-bungee", version.ref = "cloud-bungeecord" }
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
 bungeecord-api = { module = "net.md-5:bungeecord-api", version.ref = "bungeecord-api" }
+adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure-api" }
+adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure-text-minimessage" }
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

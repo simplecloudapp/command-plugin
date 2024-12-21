@@ -1,10 +1,11 @@
 package app.simplecloud.plugin.command.shared
 
+import net.kyori.adventure.text.Component
+
 /**
  * @author Fynn Bauer in 2024
  */
 interface CloudSender {
 
-    // TODO: support adventure components
-    fun sendMessage(message: String)
+    fun sendMessage(message: Component)
 }
