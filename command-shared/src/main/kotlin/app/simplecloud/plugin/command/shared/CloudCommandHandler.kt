@@ -1,6 +1,7 @@
 package app.simplecloud.plugin.command.shared
 
 import app.simplecloud.controller.api.ControllerApi
+import build.buf.gen.simplecloud.controller.v1.ServerStopCause
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
@@ -71,7 +72,7 @@ class CloudCommandHandler<C : CloudSender>(
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
 
-                    controllerApi.getServers().startServer(group).thenApply { server ->
+                    controllerApi.getServers().startServer(group).thenAccept { server ->
                         val message = MiniMessage.miniMessage().deserialize(
                             commandPlugin.messageConfiguration.serverStarting,
                             Placeholder.component("group", Component.text(group)),
@@ -139,69 +140,84 @@ class CloudCommandHandler<C : CloudSender>(
 
                     when {
                         groupName != null && id != null -> {
-                            controllerApi.getServers().getServerByNumerical(groupName, id).thenApply { server ->
-                                context.sender().sendMessage(
-                                    MiniMessage.miniMessage()
-                                        .deserialize(
-                                            commandPlugin.messageConfiguration.serverInfoTitle,
-                                            Placeholder.component("serverGroup", Component.text(server.group)),
-                                            // TODO: real serverAmount
-                                            Placeholder.component("serverAmount", Component.text("1")),
-                                        )
-                                )
-                                context.sender().sendMessage(
-                                    MiniMessage.miniMessage()
-                                        .deserialize(
-                                            commandPlugin.messageConfiguration.serverInfoType,
-                                            Placeholder.component("groupType", Component.text(server.type.name))
-                                        )
-                                )
-                                context.sender().sendMessage(
-                                    MiniMessage.miniMessage()
-                                        .deserialize(
-                                            commandPlugin.messageConfiguration.serverInfoSoftware,
-                                            // TODO: real software
-                                            Placeholder.component("groupSoftware", Component.text("PAPER"))
-                                        )
-                                )
-                                context.sender().sendMessage(
-                                    MiniMessage.miniMessage()
-                                        .deserialize(
-                                            commandPlugin.messageConfiguration.serverInfoMemory,
-                                            Placeholder.component("groupMemory", Component.text(server.maxMemory))
-                                        )
-                                )
-                                context.sender().sendMessage(
-                                    MiniMessage.miniMessage()
-                                        .deserialize(
-                                            commandPlugin.messageConfiguration.serverInfoPlayers,
-                                            Placeholder.component("groupPlayers", Component.text(server.playerCount))
-                                        )
-                                )
+                            controllerApi.getServers().getServerByNumerical(groupName, id).thenAccept { server ->
+                                controllerApi.getGroups().getGroupByName(groupName).thenAccept { group ->
+                                    context.sender().sendMessage(
+                                        MiniMessage.miniMessage()
+                                            .deserialize(
+                                                commandPlugin.messageConfiguration.serverInfoTitle,
+                                                Placeholder.component("servergroup", Component.text(server.group)),
+                                                Placeholder.component(
+                                                    "serveramount",
+                                                    Component.text(
+                                                        controllerApi.getServers().getServersByGroup(groupName)
+                                                            .get().size.toString()
+                                                    )
+                                                ),
+                                            )
+                                    )
+                                    context.sender().sendMessage(
+                                        MiniMessage.miniMessage()
+                                            .deserialize(
+                                                commandPlugin.messageConfiguration.serverInfoType,
+                                                Placeholder.component("grouptype", Component.text(server.type.name))
+                                            )
+                                    )
+                                    context.sender().sendMessage(
+                                        MiniMessage.miniMessage()
+                                            .deserialize(
+                                                commandPlugin.messageConfiguration.serverInfoSoftware,
+                                                Placeholder.component(
+                                                    "groupsoftware",
+                                                    Component.text(group.properties["server-software"].toString())
+                                                )
+                                            )
+                                    )
+                                    context.sender().sendMessage(
+                                        MiniMessage.miniMessage()
+                                            .deserialize(
+                                                commandPlugin.messageConfiguration.serverInfoMemory,
+                                                Placeholder.component("groupmemory", Component.text(server.maxMemory))
+                                            )
+                                    )
+                                    context.sender().sendMessage(
+                                        MiniMessage.miniMessage()
+                                            .deserialize(
+                                                commandPlugin.messageConfiguration.serverInfoPlayers,
+                                                Placeholder.component(
+                                                    "groupplayers",
+                                                    Component.text(server.playerCount)
+                                                )
+                                            )
+                                    )
+                                }
                             }
                         }
 
                         groupName != null -> {
-                            controllerApi.getServers().getServersByGroup(groupName).thenApply { servers ->
+                            controllerApi.getServers().getServersByGroup(groupName).thenAccept { servers ->
                                 context.sender().sendMessage(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.groupServerListTitle,
-                                        Placeholder.component("serverGroup", Component.text(groupName))
+                                        Placeholder.component("servergroup", Component.text(groupName))
                                     )
                                 )
                                 servers.forEach { server ->
                                     context.sender().sendMessage(
                                         MiniMessage.miniMessage().deserialize(
                                             commandPlugin.messageConfiguration.groupServerListEntry,
-                                            Placeholder.component("serverGroup", Component.text(server.group)),
+                                            Placeholder.component("servergroup", Component.text(server.group)),
                                             Placeholder.component(
-                                                "numericalId",
+                                                "numericalid",
                                                 Component.text(server.numericalId.toString())
                                             ),
-                                            Placeholder.component("onlinePlayers", Component.text(server.playerCount)),
-                                            Placeholder.component("maxPlayers", Component.text(server.maxPlayers)),
-                                            Placeholder.component("minMemory", Component.text(server.minMemory)),
-                                            Placeholder.component("maxMemory", Component.text(server.maxMemory)),
+                                            Placeholder.component(
+                                                "onlineplayers",
+                                                Component.text(server.playerCount)
+                                            ),
+                                            Placeholder.component("maxplayers", Component.text(server.maxPlayers)),
+                                            Placeholder.component("minmemory", Component.text(server.minMemory)),
+                                            Placeholder.component("maxmemory", Component.text(server.maxMemory)),
                                             Placeholder.component("state", Component.text(server.state.name)),
                                         )
                                     )
@@ -209,13 +225,8 @@ class CloudCommandHandler<C : CloudSender>(
                             }
                         }
 
-                        id != null -> {
-                            // TODO
-                            println("Getting server with ID $id")
-                        }
-
                         else -> {
-                            controllerApi.getServers().getAllServers().thenApply { servers ->
+                            controllerApi.getServers().getAllServers().thenAccept { servers ->
                                 context.sender().sendMessage(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.serverListTitle,
@@ -225,15 +236,18 @@ class CloudCommandHandler<C : CloudSender>(
                                     context.sender().sendMessage(
                                         MiniMessage.miniMessage().deserialize(
                                             commandPlugin.messageConfiguration.serverListEntry,
-                                            Placeholder.component("serverGroup", Component.text(server.group)),
+                                            Placeholder.component("servergroup", Component.text(server.group)),
                                             Placeholder.component(
-                                                "numericalId",
+                                                "numericalid",
                                                 Component.text(server.numericalId.toString())
                                             ),
-                                            Placeholder.component("onlinePlayers", Component.text(server.playerCount)),
-                                            Placeholder.component("maxPlayers", Component.text(server.maxPlayers)),
-                                            Placeholder.component("minMemory", Component.text(server.minMemory)),
-                                            Placeholder.component("maxMemory", Component.text(server.maxMemory)),
+                                            Placeholder.component(
+                                                "onlineplayers",
+                                                Component.text(server.playerCount)
+                                            ),
+                                            Placeholder.component("maxplayers", Component.text(server.maxPlayers)),
+                                            Placeholder.component("minmemory", Component.text(server.minMemory)),
+                                            Placeholder.component("maxmemory", Component.text(server.maxMemory)),
                                             Placeholder.component("state", Component.text(server.state.name)),
                                         )
                                     )
@@ -265,15 +279,15 @@ class CloudCommandHandler<C : CloudSender>(
                                 context.sender().sendMessage(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.groupInfoTitle,
-                                        Placeholder.component("serverGroup", Component.text(groupName)),
-                                        Placeholder.component("serverAmount", Component.text(servers.size))
+                                        Placeholder.component("servergroup", Component.text(groupName)),
+                                        Placeholder.component("serveramount", Component.text(servers.size))
                                     )
                                 )
 
                                 context.sender().sendMessage(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.groupInfoType,
-                                        Placeholder.component("groupType", Component.text(group.type.name))
+                                        Placeholder.component("grouptype", Component.text(group.type.name))
                                     )
                                 )
 
@@ -281,7 +295,7 @@ class CloudCommandHandler<C : CloudSender>(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.groupInfoTemplate,
                                         Placeholder.component(
-                                            "groupTemplate",
+                                            "grouptemplate",
                                             Component.text(group.properties.get("template-id").toString())
                                         )
                                     )
@@ -290,43 +304,48 @@ class CloudCommandHandler<C : CloudSender>(
                                 context.sender().sendMessage(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.groupInfoMemory,
-                                        Placeholder.component("minMemory", Component.text(group.minMemory)),
-                                        Placeholder.component("maxMemory", Component.text(group.maxMemory))
+                                        Placeholder.component("minmemory", Component.text(group.minMemory)),
+                                        Placeholder.component("maxmemory", Component.text(group.maxMemory))
                                     )
                                 )
 
                                 context.sender().sendMessage(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.groupInfoPlayers,
-                                        Placeholder.component("maxPlayers", Component.text(group.maxPlayers))
+                                        Placeholder.component("maxplayers", Component.text(group.maxPlayers))
                                     )
                                 )
                             }
                         }
                     } else {
-                        controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                        controllerApi.getGroups().getAllGroups().thenAccept { groups ->
                             context.sender().sendMessage(
                                 MiniMessage.miniMessage()
                                     .deserialize(commandPlugin.messageConfiguration.groupsListTitle)
                             )
                             groups.forEach { group ->
                                 context.sender().sendMessage(
-                                    MiniMessage.miniMessage()
-                                        .deserialize(
-                                            commandPlugin.messageConfiguration.groupsListEntry,
-                                            Placeholder.component("serverGroup", Component.text(group.name)),
-                                            // TODO: add online count
-                                            Placeholder.component("onlineCount", Component.text("TODO")),
-                                            Placeholder.component(
-                                                "template",
-                                                Component.text(group.properties["template-id"].toString())
-                                            ),
-                                            Placeholder.component("type", Component.text(group.type.name)),
-                                            Placeholder.component("maxCount", Component.text(group.maxOnlineCount)),
-                                            Placeholder.component("minMemory", Component.text(group.minMemory)),
-                                            Placeholder.component("maxMemory", Component.text(group.maxMemory)),
-                                        )
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.groupsListEntry,
+                                        Placeholder.component("servergroup", Component.text(group.name)),
+                                        Placeholder.component(
+                                            "onlinecount",
+                                            Component.text(
+                                                controllerApi.getServers().getServersByGroup(group)
+                                                    .get().size.toString()
+                                            )
+                                        ),
+                                        Placeholder.component(
+                                            "template",
+                                            Component.text(group.properties["template-id"].toString())
+                                        ),
+                                        Placeholder.component("type", Component.text(group.type.name)),
+                                        Placeholder.component("maxcount", Component.text(group.maxOnlineCount)),
+                                        Placeholder.component("minmemory", Component.text(group.minMemory)),
+                                        Placeholder.component("maxmemory", Component.text(group.maxMemory)),
+                                    )
                                 )
+
                             }
                         }
                     }
@@ -353,6 +372,15 @@ class CloudCommandHandler<C : CloudSender>(
                         commandPlugin.messageConfiguration.groupDeleted,
                         Placeholder.component("group", Component.text(group))
                     )
+
+                    controllerApi.getServers().getServersByGroup(group).thenAccept { servers ->
+                        servers.forEach { server ->
+                            controllerApi.getServers().stopServer(
+                                server.group,
+                                server.numericalId.toLong()
+                            )
+                        }
+                    }
 
                     controllerApi.getGroups().deleteGroup(group)
                     context.sender().sendMessage(message)
