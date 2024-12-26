@@ -52,6 +52,8 @@ subprojects {
     tasks.named("shadowJar", ShadowJar::class) {
         dependencies {
             exclude(dependency("com.velocitypowered:velocity-api"))
+
+            relocate("org.incendo", "app.simplecloud.plugin.command.external")
         }
        /* dependsOn("processResources")
         dependencies {
