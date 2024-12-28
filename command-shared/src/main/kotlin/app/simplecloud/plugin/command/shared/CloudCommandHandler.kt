@@ -96,23 +96,42 @@ class CloudCommandHandler<C : CloudSender>(
                         groups.map { group -> Suggestion.suggestion(group.name) }
                     }
                 })
-                .required("id", longParser(), SuggestionProvider { _, _ ->
+                .optional("id", longParser(), SuggestionProvider { _, _ ->
                     controllerApi.getServers().getAllServers().thenApply { servers ->
                         servers.map { server -> Suggestion.suggestion(server.numericalId.toString()) }
                     }
                 })
                 .handler { context: CommandContext<C> ->
                     val group = context.get<String>("group")
-                    val id = context.get<Long>("id")
+                    val id = context.getOrDefault("id", null as Long?)
 
-                    val message = MiniMessage.miniMessage().deserialize(
-                        commandPlugin.messageConfiguration.serverStopped,
-                        Placeholder.component("group", Component.text(group)),
-                        Placeholder.component("id", Component.text(id.toString()))
-                    )
+                    if (id == null) {
+                        val message = MiniMessage.miniMessage().deserialize(
+                            commandPlugin.messageConfiguration.groupServerStopped,
+                            Placeholder.component("group", Component.text(group)),
+                        )
 
-                    context.sender().sendMessage(message)
-                    controllerApi.getServers().stopServer(group, id)
+                        controllerApi.getServers().getServersByGroup(group).thenAccept { servers ->
+                            servers.forEach { server ->
+                                controllerApi.getServers().stopServer(
+                                    server.group,
+                                    server.numericalId.toLong()
+                                )
+                            }
+                        }
+
+                        context.sender().sendMessage(message)
+                    } else {
+
+                        val message = MiniMessage.miniMessage().deserialize(
+                            commandPlugin.messageConfiguration.serverStopped,
+                            Placeholder.component("group", Component.text(group)),
+                            Placeholder.component("id", Component.text(id.toString()))
+                        )
+
+                        controllerApi.getServers().stopServer(group, id)
+                        context.sender().sendMessage(message)
+                    }
                 }
                 .permission(Permission.permission("simplecloud.command.cloud.stop"))
                 .build()

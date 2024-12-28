@@ -10,6 +10,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 data class MessageConfig(
     val serverStarting: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>A new server of group <group> is <color:#a3e635>starting <color:#a3a3a3>(<group> <id>)",
     val serverStopped: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Server <group> <id> was <color:#dc2626>stopped.",
+    val groupServerStopped: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Servers of group <group> were <color:#dc2626>stopped.",
     val groupDeleted: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Server group <group> was <color:#dc2626>deleted.",
 
     val cloudHelpTitle: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Commands of Cloud Command Plugin",
@@ -19,7 +20,6 @@ data class MessageConfig(
     val cloudGroupInfoCommand: String = "   <color:#a3a3a3>/cloud info groups [groupName] [Numerical ID]",
     val cloudDeleteGroupCommand: String = "   <color:#a3a3a3>/cloud delete group <serverGroup>",
 
-    // TODO: update to server infos
     val serverInfoTitle: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Information of server <servergroup> <color:#a3e635>● <serveramount> Online",
     val serverInfoType: String = "   <color:#a3a3a3>Type: <color:#38bdf8><grouptype>",
     val serverInfoSoftware: String = "   <color:#a3a3a3>Software: <color:#38bdf8><groupsoftware>",
@@ -31,7 +31,6 @@ data class MessageConfig(
     val groupInfoTemplate: String = "   <color:#a3a3a3>Template: <color:#38bdf8><grouptemplate>",
     val groupInfoMemory: String = "   <color:#a3a3a3>Memory: <color:#38bdf8><minmemory>-<maxmemory>",
     val groupInfoPlayers: String = "   <color:#a3a3a3>Players: <color:#38bdf8><maxplayers>",
-
 
     val groupsListTitle: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>List of every server group",
     val groupsListEntry: String = "   <color:#a3a3a3><servergroup> <color:#a3e635>● <onlinecount> Online <color:#737373>(<template>, <type>, <maxcount> MaxCount, <minmemory>-<maxmemory>MB)",
