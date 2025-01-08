@@ -7,9 +7,13 @@ plugins {
     `maven-publish`
 }
 
+val baseVersion = "0.0.1"
+val commitHash = System.getenv("COMMIT_HASH")
+val snapshotversion = "${baseVersion}-dev.$commitHash"
+
 allprojects {
     group = "app.simplecloud.plugin.command"
-    version = "0.0.1"
+    version = if (commitHash != null) snapshotversion else baseVersion
 
     repositories {
         mavenCentral()
