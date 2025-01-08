@@ -44,6 +44,12 @@ jobs:
         id: commit_hash
         run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
+      - name: Publish to Modrinth
+        run: ./gradlew modrinth && ./gradlew modrinthSyncBody
+        env:
+          COMMIT_HASH: ${{ env.COMMIT_HASH }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

@@ -10,6 +10,7 @@ velocity = "3.4.0-SNAPSHOT"
 bungeecord-api = "1.21-R0.1-SNAPSHOT"
 adventure-api = "4.17.0"
 adventure-text-minimessage = "4.17.0"
+minotaur = "2.8.7"
 
 [libraries]
 kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
@@ -27,3 +28,4 @@ adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", 
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kapt" }
+minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
