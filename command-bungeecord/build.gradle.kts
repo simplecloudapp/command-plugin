@@ -5,6 +5,7 @@ plugins {
 dependencies {
     api(project(":command-shared"))
     api(libs.bungeecord.api)
+    api(libs.adveture.platform.bungeecord)
     api(libs.cloud.bungeecord)
 }
 
