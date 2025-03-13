@@ -1,6 +1,7 @@
 package app.simplecloud.plugin.command.shared
 
 import app.simplecloud.controller.api.ControllerApi
+import app.simplecloud.controller.shared.group.Group
 import build.buf.gen.simplecloud.controller.v1.ServerStopCause
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -12,7 +13,9 @@ import org.incendo.cloud.parser.standard.StringParser.stringParser
 import org.incendo.cloud.permission.Permission
 import org.incendo.cloud.suggestion.Suggestion
 import org.incendo.cloud.suggestion.SuggestionProvider
+import java.util.concurrent.CompletableFuture
 
+// TODO: maybe move this into multiple classes?
 class CloudCommandHandler<C : CloudSender>(
     private val commandManager: CommandManager<C>,
     val commandPlugin: CommandPlugin
@@ -41,6 +44,12 @@ class CloudCommandHandler<C : CloudSender>(
                         MiniMessage.miniMessage().deserialize(commandPlugin.messageConfiguration.cloudGroupInfoCommand)
                     )
                     context.sender().sendMessage(
+                        MiniMessage.miniMessage().deserialize(commandPlugin.messageConfiguration.cloudEditGroupCommand)
+                    )
+                    context.sender().sendMessage(
+                        MiniMessage.miniMessage().deserialize(commandPlugin.messageConfiguration.cloudEditServerCommand)
+                    )
+                    context.sender().sendMessage(
                         MiniMessage.miniMessage()
                             .deserialize(commandPlugin.messageConfiguration.cloudDeleteGroupCommand)
                     )
@@ -54,6 +63,8 @@ class CloudCommandHandler<C : CloudSender>(
         registerServerInfoCommand()
         registerGroupInfoCommand()
         registerDeleteGroupCommand()
+        registerEditGroupCommand()
+        registerEditServerCommand()
     }
 
     private fun registerStartCommand() {
@@ -405,6 +416,194 @@ class CloudCommandHandler<C : CloudSender>(
                     context.sender().sendMessage(message)
                 }
                 .permission(Permission.permission("simplecloud.command.cloud.delete.group"))
+                .build()
+        )
+    }
+
+    private fun registerEditGroupCommand() {
+        commandManager.command(
+            commandManager.commandBuilder("cloud")
+                .literal("edit")
+                .literal("group")
+                .required("group", stringParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                        groups.map { group -> Suggestion.suggestion(group.name) }
+                    }
+                })
+                .required("setting", stringParser(), SuggestionProvider { _, _ ->
+                    CompletableFuture.completedFuture(
+                        listOf(
+                            "max-players",
+                            "max-memory",
+                            "max-online-count",
+                            "min-memory",
+                            "min-online-count",
+                            "properties",
+                            "server-url",
+                            "start-port"
+                        ).map { Suggestion.suggestion(it) }
+                    )
+                })
+                .required("value", stringParser())
+                .handler { context: CommandContext<C> ->
+                    val groupName = context.get<String>("group")
+                    val setting = context.get<String>("setting")
+                    val value = context.get<String>("value")
+
+                    controllerApi.getGroups().getGroupByName(groupName).thenAccept { group ->
+                        val updatedGroup = when (setting) {
+                            "max-players" -> group.copy(
+                                maxPlayers = value.toLongOrNull() ?: return@thenAccept context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidValue,
+                                        Placeholder.component("value", Component.text(value)),
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                            )
+
+                            "max-memory" -> group.copy(
+                                maxMemory = value.toLongOrNull() ?: return@thenAccept context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidValue,
+                                        Placeholder.component("value", Component.text(value)),
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                            )
+
+                            "min-memory" -> group.copy(
+                                minMemory = value.toLongOrNull() ?: return@thenAccept context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidValue,
+                                        Placeholder.component("value", Component.text(value)),
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                            )
+
+                            "max-online-count" -> group.copy(
+                                maxOnlineCount = value.toLongOrNull() ?: return@thenAccept context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidValue,
+                                        Placeholder.component("value", Component.text(value)),
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                            )
+
+                            "min-online-count" -> group.copy(
+                                minOnlineCount = value.toLongOrNull() ?: return@thenAccept context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidValue,
+                                        Placeholder.component("value", Component.text(value)),
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                            )
+
+                            "start-port" -> group.copy(
+                                startPort = value.toLongOrNull() ?: return@thenAccept context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidValue,
+                                        Placeholder.component("value", Component.text(value)),
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                            )
+
+                            "server-url" -> group.copy(properties = group.properties + mapOf("server-url" to value))
+                            "properties" -> group.copy(properties = group.properties + mapOf("custom-property" to value))
+                            else -> {
+                                context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidSetting,
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                                return@thenAccept
+                            }
+                        }
+
+                        controllerApi.getGroups().updateGroup(updatedGroup).thenAccept { group ->
+                            context.sender().sendMessage(
+                                MiniMessage.miniMessage().deserialize(
+                                    commandPlugin.messageConfiguration.groupUpdated,
+                                    Placeholder.component("group", Component.text(group.name))
+                                )
+                            )
+                        }
+                    }
+
+
+                }
+                .permission(Permission.permission("simplecloud.command.cloud.edit.group"))
+                .build()
+        )
+    }
+
+    private fun registerEditServerCommand() {
+        commandManager.command(
+            commandManager.commandBuilder("cloud")
+                .literal("edit")
+                .literal("server")
+                .required("group", stringParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getGroups().getAllGroups().thenApply { groups ->
+                        groups.map { group -> Suggestion.suggestion(group.name) }
+                    }
+                })
+                .required("id", longParser(), SuggestionProvider { _, _ ->
+                    controllerApi.getServers().getAllServers().thenApply { servers ->
+                        servers.map { server -> Suggestion.suggestion(server.numericalId.toString()) }
+                    }
+                })
+                .required("setting", stringParser(), SuggestionProvider { _, _ ->
+                    CompletableFuture.completedFuture(
+                        listOf("max-players").map { Suggestion.suggestion(it) }
+                    )
+                })
+                .required("value", stringParser())
+                .handler { context: CommandContext<C> ->
+                    val groupName = context.get<String>("group")
+                    val serverId = context.get<Long>("id")
+                    val setting = context.get<String>("setting")
+                    val value = context.get<String>("value")
+
+                    controllerApi.getServers().getServerByNumerical(groupName, serverId).thenAccept { server ->
+                        val updatedServer = when (setting) {
+                            "max-players" -> server.copy(
+                                maxPlayers = value.toLongOrNull() ?: return@thenAccept context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidValue,
+                                        Placeholder.component("value", Component.text(value)),
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                            )
+
+                            else -> {
+                                context.sender().sendMessage(
+                                    MiniMessage.miniMessage().deserialize(
+                                        commandPlugin.messageConfiguration.invalidSetting,
+                                        Placeholder.component("key", Component.text(setting))
+                                    )
+                                )
+                                return@thenAccept
+                            }
+                        }
+
+                        controllerApi.getServers().updateServer(updatedServer).thenAccept { server ->
+                            context.sender().sendMessage(
+                                MiniMessage.miniMessage().deserialize(
+                                    commandPlugin.messageConfiguration.serverUpdated,
+                                    Placeholder.component("group", Component.text(server.group)),
+                                    Placeholder.component("numericalid", Component.text(server.numericalId.toString()))
+                                )
+                            )
+                        }
+                    }
+                }
+                .permission(Permission.permission("simplecloud.command.cloud.edit.server"))
                 .build()
         )
     }

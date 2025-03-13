@@ -19,6 +19,8 @@ data class MessageConfig(
     val cloudServerInfoCommand: String = "   <color:#a3a3a3>/cloud info servers [serverGroup] [Numerical ID]",
     val cloudGroupInfoCommand: String = "   <color:#a3a3a3>/cloud info groups [groupName] [Numerical ID]",
     val cloudDeleteGroupCommand: String = "   <color:#a3a3a3>/cloud delete group <serverGroup>",
+    val cloudEditGroupCommand: String = "   <color:#a3a3a3>/cloud edit group <serverGroup> <key> <value>",
+    val cloudEditServerCommand: String = "   <color:#a3a3a3>/cloud edit server <serverGroup> <Numerical ID> <key> <value>",
 
     val serverInfoTitle: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Information of server <servergroup> <color:#a3e635>● <serveramount> Online",
     val serverInfoType: String = "   <color:#a3a3a3>Type: <color:#38bdf8><grouptype>",
@@ -39,6 +41,12 @@ data class MessageConfig(
     val groupServerListEntry: String = "   <color:#a3a3a3><servergroup> <numericalid> <color:#737373>(<onlineplayers>/<maxplayers> Players, <minmemory>/<maxmemory>MB, <state>)",
 
     val serverListTitle: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>List of every running server",
-    val serverListEntry: String = "   <color:#a3a3a3><servergroup> <numericalid> <color:#737373>(<onlineplayers>/<maxplayers> Players, <minmemory>/<maxmemory>MB, <state>)"
+    val serverListEntry: String = "   <color:#a3a3a3><servergroup> <numericalid> <color:#737373>(<onlineplayers>/<maxplayers> Players, <minmemory>/<maxmemory>MB, <state>)",
 
+    val invalidValue: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#dc2626>Invalid value <color:#a3a3a3><value> <color:#dc2626>for <color:#a3a3a3><key>.",
+    val invalidSetting: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#dc2626>Invalid setting <color:#a3a3a3><key>.",
+
+    val groupUpdated: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Group <group> was <color:#dc2626>updated.",
+
+    val serverUpdated: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#ffffff>Server <group> <numericalid> was <color:#dc2626>updated."
 )
