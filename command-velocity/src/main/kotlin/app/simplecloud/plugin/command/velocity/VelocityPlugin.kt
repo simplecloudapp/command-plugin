@@ -23,7 +23,9 @@ import kotlin.io.path.pathString
  * @author Fynn Bauer in 2024
  */
 
-@Plugin(id = "command-plugin", name = "SimpleCloud Command Plugin", authors = ["Kaseax"], version = "0.0.1-EXPERIMENTAL")
+@Plugin(id = "command-plugin", name = "SimpleCloud Command Plugin", authors = ["Kaseax"], version = "0.0.1-EXPERIMENTAL", dependencies = [
+    @Dependency(id = "simplecloud-api")
+  ])
 class VelocityPlugin @Inject constructor(
     private val server: ProxyServer,
     @DataDirectory val dataDirectory: Path,
