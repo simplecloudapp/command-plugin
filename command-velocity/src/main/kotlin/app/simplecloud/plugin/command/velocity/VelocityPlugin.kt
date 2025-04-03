@@ -3,12 +3,11 @@ package app.simplecloud.plugin.command.velocity
 import app.simplecloud.plugin.command.shared.CloudCommandHandler
 import app.simplecloud.plugin.command.shared.CloudSender
 import app.simplecloud.plugin.command.shared.CommandPlugin
-import app.simplecloud.plugin.command.shared.config.MessageConfig
-import app.simplecloud.plugin.command.shared.config.YamlConfig
 import com.google.inject.Inject
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
+import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.PluginContainer
 import com.velocitypowered.api.plugin.annotation.DataDirectory
@@ -23,7 +22,17 @@ import kotlin.io.path.pathString
  * @author Fynn Bauer in 2024
  */
 
-@Plugin(id = "command-plugin", name = "SimpleCloud Command Plugin", authors = ["Kaseax"], version = "0.0.1-EXPERIMENTAL")
+@Plugin(
+    id = "command-plugin",
+    name = "SimpleCloud Command Plugin",
+    authors = ["Kaseax"],
+    version = "0.0.1-EXPERIMENTAL",
+    dependencies = [
+        Dependency(
+            id = "simplecloud-api"
+        )
+    ]
+)
 class VelocityPlugin @Inject constructor(
     private val server: ProxyServer,
     @DataDirectory val dataDirectory: Path,
