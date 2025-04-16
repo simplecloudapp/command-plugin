@@ -13,6 +13,9 @@ adventure-platform-bungeecord = "4.3.4"
 adventure-text-minimessage = "4.17.0"
 minotaur = "2.8.7"
 
+configurate-yaml = "4.0.0"
+configurate-kotlin = "4.1.2"
+
 [libraries]
 kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -25,6 +28,8 @@ bungeecord-api = { module = "net.md-5:bungeecord-api", version.ref = "bungeecord
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure-api" }
 adveture-platform-bungeecord = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventure-platform-bungeecord" }
 adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure-text-minimessage" }
+configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate-yaml" }
+configurate-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate-kotlin" }
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

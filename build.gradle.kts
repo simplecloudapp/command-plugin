@@ -31,7 +31,7 @@ subprojects {
 
     dependencies {
         testImplementation(rootProject.libs.kotlin.test)
-        implementation(rootProject.libs.kotlin.jvm)
+        compileOnly(rootProject.libs.kotlin.jvm)
     }
 
     publishing {
@@ -58,7 +58,9 @@ subprojects {
         dependencies {
             exclude(dependency("com.velocitypowered:velocity-api"))
 
-            relocate("org.incendo", "app.simplecloud.plugin.command.external")
+            relocate("org.incendo", "app.simplecloud.plugin.command.relocate.incendo")
+            relocate("org.spongepowered", "app.simplecloud.plugin.command.relocate.spongepowered")
+            relocate("app.simplecloud.plugin.api", "app.simplecloud.plugin.command.relocate.plugin.api")
         }
        /* dependsOn("processResources")
         dependencies {
