@@ -2,7 +2,7 @@
 kotlin = "2.0.20"
 shadow = "8.3.3"
 kapt = "2.0.20"
-simplecloud-controller = "0.0.30-SNAPSHOT.2660ec8"
+simplecloud-api = "0.1.0-platform.1-dev.1763294516035-de96444"
 cloud-core = "2.0.0"
 cloud-velocity = "2.0.0-beta.10"
 cloud-bungeecord = "2.0.0-beta.10"
@@ -19,7 +19,7 @@ configurate-kotlin = "4.1.2"
 [libraries]
 kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-simplecloud-controller = { module = "app.simplecloud.controller:controller-api", version.ref = "simplecloud-controller"}
+simplecloud-api = { module = "app.simplecloud.api:api", version.ref = "simplecloud-api" }
 cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud-core" }
 cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud-velocity" }
 cloud-bungeecord = { module = "org.incendo:cloud-bungee", version.ref = "cloud-bungeecord" }
