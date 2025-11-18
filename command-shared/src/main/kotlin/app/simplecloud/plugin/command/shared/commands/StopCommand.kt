@@ -1,6 +1,7 @@
 package app.simplecloud.plugin.command.shared.commands
 
 import app.simplecloud.api.CloudApi
+import app.simplecloud.api.server.ServerQuery
 import app.simplecloud.plugin.command.shared.CloudSender
 import app.simplecloud.plugin.command.shared.CommandPlugin
 import net.kyori.adventure.text.Component
@@ -45,18 +46,15 @@ class StopCommand<C : CloudSender>(
 
                         // TODO: get server by group
 
-                        /* controllerApi.getServers().getServersByGroup(group).thenAccept { servers ->
-                            servers.forEach { server ->
-                                controllerApi.getServers().stopServer(
-                                    server.group,
-                                    server.numericalId.toLong()
-                                )
+                        cloudApi.server().getAllServers(ServerQuery.create().filterByServerGroupName(group))
+                            .thenApply { servers ->
+                                servers.forEach { server ->
+                                    cloudApi.server().stopServer(server.serverId)
+                                }
                             }
-                        } */
 
                         context.sender().sendMessage(message)
                     } else {
-
                         val message = MiniMessage.miniMessage().deserialize(
                             commandPlugin.messageConfiguration.serverStopped,
                             Placeholder.component("group", Component.text(group)),

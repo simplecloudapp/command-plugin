@@ -1,6 +1,7 @@
 package app.simplecloud.plugin.command.shared.commands
 
 import app.simplecloud.api.CloudApi
+import app.simplecloud.api.server.ServerQuery
 import app.simplecloud.plugin.command.shared.CloudSender
 import app.simplecloud.plugin.command.shared.CommandPlugin
 import net.kyori.adventure.text.Component
@@ -12,7 +13,6 @@ import org.incendo.cloud.parser.standard.StringParser.stringParser
 import org.incendo.cloud.permission.Permission
 import org.incendo.cloud.suggestion.Suggestion
 import org.incendo.cloud.suggestion.SuggestionProvider
-import kotlin.text.get
 
 class GroupInfoCommand<C : CloudSender>(
     private val cloudApi: CloudApi,
@@ -34,9 +34,8 @@ class GroupInfoCommand<C : CloudSender>(
                     if (groupName != null) {
                         cloudApi.group().getGroupByName(groupName).thenAccept { group ->
                             // TODO: get server by group
-                        }
-                        /* controllerApi.getGroups().getGroupByName(groupName).thenAccept { group ->
-                            controllerApi.getServers().getServersByGroup(groupName).thenAccept { servers ->
+                            cloudApi.server().getAllServers(ServerQuery.create()
+                                .filterByServerGroupName(groupName)).thenAccept { servers ->
                                 context.sender().sendMessage(
                                     MiniMessage.miniMessage().deserialize(
                                         commandPlugin.messageConfiguration.groupInfoTitle,
@@ -77,7 +76,7 @@ class GroupInfoCommand<C : CloudSender>(
                                     )
                                 )
                             }
-                        }  */
+                        }
                     } else {
                         cloudApi.group().allGroups.thenAccept { groups ->
                             context.sender().sendMessage(
@@ -92,9 +91,7 @@ class GroupInfoCommand<C : CloudSender>(
                                         Placeholder.component(
                                             "onlinecount",
                                             Component.text(
-                                             /* TODO   cloudApi.server().getServersByGroup(group)
-                                                    .get().size.toString() */
-                                                0
+                                                cloudApi.server().getAllServers(ServerQuery.create().filterByServerGroupName(groupName)).get().size.toString()
                                             )
                                         ),
                                         Placeholder.component(

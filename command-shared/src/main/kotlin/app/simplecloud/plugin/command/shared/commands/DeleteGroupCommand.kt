@@ -1,6 +1,7 @@
 package app.simplecloud.plugin.command.shared.commands
 
 import app.simplecloud.api.CloudApi
+import app.simplecloud.api.server.ServerQuery
 import app.simplecloud.plugin.command.shared.CloudSender
 import app.simplecloud.plugin.command.shared.CommandPlugin
 import net.kyori.adventure.text.Component
@@ -36,19 +37,13 @@ class DeleteGroupCommand<C : CloudSender>(
                         Placeholder.component("group", Component.text(group))
                     )
 
-
-
-                    // TODO: getServersByGroup
-                    /* controllerApi.getServers().getServersByGroup(group).thenAccept { servers ->
+                    cloudApi.server().getAllServers(ServerQuery.create().filterByServerGroupName(group)).thenAccept { servers ->
                         servers.forEach { server ->
-                            controllerApi.getServers().stopServer(
-                                server.group,
-                                server.numericalId.toLong()
-                            )
+                            cloudApi.server().stopServer(server.serverId)
                         }
                     }
 
-                    controllerApi.getGroups().deleteGroup(group) */
+                    cloudApi.group().deleteGroup(group)
                     context.sender().sendMessage(message)
                 }
                 .permission(Permission.permission("simplecloud.command.cloud.delete.group"))
