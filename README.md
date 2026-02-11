@@ -48,7 +48,7 @@ This repository is licensed under [Apache 2.0][license].
 [docs-thisproject]: https://docs.simplecloud.app/en/manual/plugin/cloud-command
 [docs-contribute]: https://docs.simplecloud.app/contribute
 
-[modrinth]: https://modrinth.com/plugin/command-plugin
+[modrinth]: https://modrinth.com/plugin/cloud-command-plugin
 
 <!-- ⛔ DON'T TOUCH -->
 [license]: https://opensource.org/licenses/Apache-2.0
