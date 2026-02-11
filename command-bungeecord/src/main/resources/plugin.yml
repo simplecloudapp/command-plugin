@@ -1,5 +1,5 @@
 name: CommandPlugin
-version: 0.0.1-EXPERIMENTAL
+version: 1.0.0
 author: Kaseax
 main: app.simplecloud.plugin.command.bungeecord.BungeeCordPlugin
 depends: [simplecloud-api]

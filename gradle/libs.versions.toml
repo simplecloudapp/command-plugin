@@ -1,35 +1,55 @@
 [versions]
-kotlin = "2.0.20"
-shadow = "8.3.3"
-kapt = "2.0.20"
-simplecloud-api = "0.1.0-platform.1-dev.1763294516035-de96444"
+kotlin = "2.1.20"
+kotlinx-coroutines = "1.10.2"
+
+shadow = "9.3.1"
+kapt = "2.1.20"
+minotaur = "2.8.10"
+
+simplecloud-api = "0.1.0-platform.19-dev.1770725947326-23f3f70"
+
 cloud-core = "2.0.0"
 cloud-velocity = "2.0.0-beta.10"
 cloud-bungeecord = "2.0.0-beta.10"
-velocity = "3.4.0-SNAPSHOT"
-bungeecord-api = "1.21-R0.4"
-adventure-api = "4.17.0"
-adventure-platform-bungeecord = "4.3.4"
-adventure-text-minimessage = "4.17.0"
-minotaur = "2.8.7"
 
-configurate-yaml = "4.0.0"
-configurate-kotlin = "4.1.2"
+velocity = "3.5.0-SNAPSHOT"
+bungeecord-api = "1.21-R0.4"
+
+adventure-api = "4.26.1"
+adventure-platform-bungeecord = "4.4.1"
+
+configurate = "4.2.0"
+
+log4j = "2.25.3"
 
 [libraries]
 kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+
 simplecloud-api = { module = "app.simplecloud.api:api", version.ref = "simplecloud-api" }
+
 cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud-core" }
 cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud-velocity" }
 cloud-bungeecord = { module = "org.incendo:cloud-bungee", version.ref = "cloud-bungeecord" }
+
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
 bungeecord-api = { module = "net.md-5:bungeecord-api", version.ref = "bungeecord-api" }
+
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure-api" }
 adveture-platform-bungeecord = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventure-platform-bungeecord" }
-adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure-text-minimessage" }
-configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate-yaml" }
-configurate-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate-kotlin" }
+adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure-api" }
+
+configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
+configurate-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
+
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j-slf4j-impl = { module = "org.apache.logging.log4j:log4j-slf4j-impl", version.ref = "log4j" }
+
+[bundles]
+logging = ["log4j-core", "log4j-api", "log4j-slf4j-impl"]
+configurate = ["configurate-kotlin", "configurate-yaml"]
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

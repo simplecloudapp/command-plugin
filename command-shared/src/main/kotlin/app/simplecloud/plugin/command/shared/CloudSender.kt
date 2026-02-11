@@ -8,4 +8,5 @@ import net.kyori.adventure.text.Component
 interface CloudSender {
 
     fun sendMessage(message: Component)
+
 }

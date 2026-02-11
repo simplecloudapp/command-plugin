@@ -10,11 +10,10 @@ import org.incendo.cloud.SenderMapper
 import org.incendo.cloud.bungee.BungeeCommandManager
 import org.incendo.cloud.execution.ExecutionCoordinator
 
-
 /**
  * @author Fynn Bauer in 2024
  */
-class BungeeCordPlugin(): Plugin() {
+class BungeeCordPlugin : Plugin() {
 
     private lateinit var commandManager: BungeeCommandManager<CloudSender>
     private lateinit var commandPlugin: CommandPlugin
@@ -45,6 +44,7 @@ class BungeeCordPlugin(): Plugin() {
 
     override fun onDisable() {
         adventure.close()
+        commandPlugin.config.close()
     }
 
     fun adventure(): BungeeAudiences {

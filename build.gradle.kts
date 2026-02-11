@@ -32,7 +32,8 @@ subprojects {
 
     dependencies {
         testImplementation(rootProject.libs.kotlin.test)
-        compileOnly(rootProject.libs.kotlin.jvm)
+        implementation(rootProject.libs.kotlin.jvm)
+        implementation(rootProject.libs.kotlinx.coroutines.core)
     }
 
     publishing {
@@ -56,27 +57,11 @@ subprojects {
     }
 
     tasks.named("shadowJar", ShadowJar::class) {
-        dependencies {
-            exclude(dependency("com.velocitypowered:velocity-api"))
-
-            relocate("org.incendo", "app.simplecloud.plugin.command.relocate.incendo")
-            relocate("org.spongepowered", "app.simplecloud.plugin.command.relocate.spongepowered")
-            relocate("app.simplecloud.plugin.api", "app.simplecloud.plugin.command.relocate.plugin.api")
-        }
-       /* dependsOn("processResources")
-        dependencies {
-            include(project(":command-shared"))
-
-            /**
-             * TODO: Add dependencies ADDED BY YOU like this:
-             * include(dependency(libs.your.dependency.get()))
-             */
-            include(dependency(libs.cloud.core.get()))
-            // TODO: only include the velocity dependency in the velocity plugin
-            include(dependency(libs.cloud.velocity.get()))
-
-        } */
+        mergeServiceFiles()
+        relocate("org.incendo", "app.simplecloud.plugin.command.relocate.incendo")
+        relocate("org.spongepowered", "app.simplecloud.plugin.command.relocate.spongepowered")
         archiveFileName.set("${project.name}.jar")
+        archiveClassifier.set("")
     }
 }
 

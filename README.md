@@ -43,9 +43,9 @@ This repository is licensed under [Apache 2.0][license].
 
 <!-- ✅ PLEASE EDIT -->
 [banner]: https://github.com/simplecloudapp/branding/blob/main/readme/banner/plugin/cloud-command.png?raw=true
-[issue-bug-report]: https://github.com/theSimpleCloud/command-plugin/issues/new?labels=bug&projects=template=01_BUG-REPORT.yml&title=%5BBUG%5D+%3Ctitle%3E
-[issue-feature-request]: https://github.com/theSimpleCloud/command-plugin/discussions/new?category=ideas
-[docs-thisproject]: https://docs.simplecloud.app/plugin/cloud-command
+[issue-bug-report]: https://github.com/simplecloudapp/command-plugin/issues/new?labels=bug&projects=template=01_BUG-REPORT.yml&title=%5BBUG%5D+%3Ctitle%3E
+[issue-feature-request]: https://github.com/simplecloudapp/command-plugin/discussions/new?category=ideas
+[docs-thisproject]: https://docs.simplecloud.app/en/manual/plugin/cloud-command
 [docs-contribute]: https://docs.simplecloud.app/contribute
 
 [modrinth]: https://modrinth.com/plugin/command-plugin
