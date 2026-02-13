@@ -1,14 +1,7 @@
 package app.simplecloud.plugin.command.shared.commands
 
 import app.simplecloud.api.CloudApi
-import app.simplecloud.api.group.DeploymentConfig
-import app.simplecloud.api.group.DeploymentHost
-import app.simplecloud.api.group.SourceConfig
-import app.simplecloud.api.group.WorkflowsConfig
-import app.simplecloud.api.group.WorkflowWhen
 import app.simplecloud.api.group.UpdateGroupRequest
-import app.simplecloud.api.group.ScalingConfig
-import app.simplecloud.api.group.ScaleDownConfig
 import app.simplecloud.api.persistentserver.PersistentServer
 import app.simplecloud.api.persistentserver.UpdatePersistentServerRequest
 import app.simplecloud.api.server.UpdateServerRequest
@@ -47,6 +40,7 @@ class EditCommand(
         registerEditPersistent(commandManager)
     }
 
+    @Suppress("UNREACHABLE_CODE")
     private fun <C : CloudSender> registerEditGroup(commandManager: CommandManager<C>) {
         commandManager.command(
             commandManager.commandBuilder("cloud")
@@ -62,6 +56,9 @@ class EditCommand(
                 }
                 .required("value", stringParser())
                 .handler { context ->
+                    context.sender().sendMessage(miniMessage(plugin.messageConfiguration.featureUnavailableMessage))
+                    return@handler
+
                     val groupName = context.get<String>("group")
                     val setting = context.get<String>("setting")
                     val value = context.get<String>("value")
@@ -74,10 +71,6 @@ class EditCommand(
                             request.setMinMemory(group.minMemory)
                             request.setMaxMemory(group.maxMemory)
                             request.setMaxPlayers(group.maxPlayers)
-                            group.deployment?.let { request.setDeployment(copyDeploymentConfig(it)) }
-                            group.scaling?.let { request.setScaling(copyScalingConfig(it)) }
-                            group.source?.let { request.setSource(copySourceConfig(it)) }
-                            group.workflows?.let { request.setWorkflows(copyWorkflowsConfig(it)) }
                             request.setProperties(group.properties)
                             request.setTags(group.tags)
                             when (setting) {
@@ -99,56 +92,6 @@ class EditCommand(
                 .permission(Permission.permission("simplecloud.command.cloud.edit.group"))
                 .build()
         )
-    }
-
-    private fun copyDeploymentConfig(original: DeploymentConfig): DeploymentConfig {
-        val copy = DeploymentConfig()
-        copy.strategy = original.strategy
-        original.hosts?.let { hosts ->
-            copy.hosts = hosts.map { host ->
-                DeploymentHost().apply {
-                    name = host.name
-                    priority = host.priority
-                }
-            }.toTypedArray()
-        }
-        return copy
-    }
-
-    private fun copyScalingConfig(original: ScalingConfig): ScalingConfig {
-        val copy = ScalingConfig()
-        copy.availableSlots = original.availableSlots
-        copy.maxServers = original.maxServers
-        copy.minServers = original.minServers
-        copy.playerThreshold = original.playerThreshold
-        copy.scalingMode = original.scalingMode
-        original.scaleDown?.let {
-            val scaleDownCopy = ScaleDownConfig()
-            scaleDownCopy.idleTime = it.idleTime
-            scaleDownCopy.isIgnorePlayers = it.isIgnorePlayers
-            copy.scaleDown = scaleDownCopy
-        }
-        return copy
-    }
-
-    private fun copySourceConfig(original: SourceConfig): SourceConfig {
-        val copy = SourceConfig()
-        copy.type = original.type
-        copy.blueprint = original.blueprint
-        copy.image = original.image
-        return copy
-    }
-
-    private fun copyWorkflowsConfig(original: WorkflowsConfig): WorkflowsConfig {
-        val copy = WorkflowsConfig()
-        copy.manual = original.manual
-        original.`when`?.let { whenConfig ->
-            val whenCopy = WorkflowWhen()
-            whenCopy.start = whenConfig.start
-            whenCopy.stop = whenConfig.stop
-            copy.`when` = whenCopy
-        }
-        return copy
     }
 
     private fun <C : CloudSender> registerEditServer(commandManager: CommandManager<C>) {
