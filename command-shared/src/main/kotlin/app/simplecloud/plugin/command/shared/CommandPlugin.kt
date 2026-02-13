@@ -10,6 +10,5 @@ open class CommandPlugin(
     dirPath: String
 ) {
     val config = YamlConfig(dirPath)
-    val messageConfiguration: MessageConfig
-        get() = config.getCached<MessageConfig>("messages")!!
+    val messageConfiguration: MessageConfig = config.load<MessageConfig>("messages") ?: MessageConfig()
 }

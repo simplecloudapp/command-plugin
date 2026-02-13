@@ -3,7 +3,6 @@ package app.simplecloud.plugin.command.shared.config
 import kotlinx.coroutines.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.kotlin.objectMapperFactory
 import org.spongepowered.configurate.loader.ParsingException
 import org.spongepowered.configurate.yaml.NodeStyle
@@ -22,22 +21,16 @@ open class YamlConfig(private val dirPath: String) {
     }
 
     private val watchService = FileSystems.getDefault().newWatchService()
-    private val configCache = ConcurrentHashMap<String, CachedConfig>()
     private val reloadListeners = ConcurrentHashMap<String, MutableList<(Any) -> Unit>>()
     private val lastReload = ConcurrentHashMap<String, Long>()
 
     private var watcherJob: Job? = null
 
-    data class CachedConfig(
-        val data: Any,
-        val timestamp: Long = System.currentTimeMillis()
-    )
-
     init {
         startWatcher()
     }
 
-    private fun buildNode(path: String?): Pair<CommentedConfigurationNode, YamlConfigurationLoader> {
+    private fun buildNode(path: String?): Pair<org.spongepowered.configurate.CommentedConfigurationNode, YamlConfigurationLoader> {
         val file = File(if (path != null) "$dirPath/${path.lowercase()}.yml" else dirPath)
 
         if (!file.exists()) {
@@ -53,53 +46,32 @@ open class YamlConfig(private val dirPath: String) {
                     builder.registerAnnotatedObjects(objectMapperFactory())
                 }
             }.build()
-
         return Pair(loader.load(), loader)
     }
 
-    inline fun <reified T> getCached(path: String?): T? {
-        return getCached(path, T::class.java)
-    }
-
-    @PublishedApi
-    internal fun <T> getCached(path: String?, clazz: Class<T>): T? {
-        val cacheKey = path ?: "default"
-        val cached = configCache[cacheKey]
-
-        @Suppress("UNCHECKED_CAST")
-        return if (cached != null) {
-            cached.data as? T
-        } else {
-            load(path, clazz)
-        }
+    inline fun <reified T> load(path: String?): T? {
+        return load(path, T::class.java)
     }
 
     @PublishedApi
     internal fun <T> load(path: String?, clazz: Class<T>): T? {
-        val cacheKey = path ?: "default"
-        val cached = configCache[cacheKey]
-
         return try {
             val node = buildNode(path).first
             val config = node.get(clazz)
 
-            if (config != null) {
-                configCache[cacheKey] = CachedConfig(config)
-                logger.info("Config loaded: $cacheKey")
-                config
+            if (config == null) {
+                logger.error("Config loaded as null: ${path ?: "default"}")
             } else {
-                @Suppress("UNCHECKED_CAST")
-                cached?.data as? T
+                logger.info("Config loaded: ${path ?: "default"}")
             }
 
+            config
         } catch (e: ParsingException) {
-            logger.error("Failed to parse config file: $cacheKey - ${e.message}")
-            @Suppress("UNCHECKED_CAST")
-            cached?.data as? T
+            logger.error("Failed to parse config file: ${path ?: "default"} ${e.message}")
+            null
         } catch (e: Exception) {
-            logger.error("Failed to load config: $cacheKey - ${e.message}", e)
-            @Suppress("UNCHECKED_CAST")
-            cached?.data as? T
+            logger.error("Failed to load config: ${path ?: "default"} ${e.message}", e)
+            null
         }
     }
 
@@ -108,15 +80,9 @@ open class YamlConfig(private val dirPath: String) {
             val pair = buildNode(path)
             pair.first.set(obj)
             pair.second.save(pair.first)
-
-            val cacheKey = path ?: "default"
-            if (obj != null) {
-                configCache[cacheKey] = CachedConfig(obj as Any)
-            }
-
-            logger.info("Config saved: $cacheKey")
+            logger.info("Config saved: ${path ?: "default"}")
         } catch (e: Exception) {
-            logger.error("Failed to save config: $path - ${e.message}", e)
+            logger.error("Failed to save config: $path ${e.message}", e)
         }
     }
 
@@ -174,14 +140,13 @@ open class YamlConfig(private val dirPath: String) {
         val now = System.currentTimeMillis()
 
         val last = lastReload[cacheKey]
-        if (last != null && now - last < 300) {
-            return
-        }
+        if (last != null && now - last < 300) return
         lastReload[cacheKey] = now
 
         logger.info("Config file changed, reloading: ${file.name}")
 
-        val oldCache = configCache[cacheKey] ?: return
+        val listeners = reloadListeners[cacheKey]
+        if (listeners.isNullOrEmpty()) return
 
         try {
             val loader = YamlConfigurationLoader.builder()
@@ -194,28 +159,21 @@ open class YamlConfig(private val dirPath: String) {
                 }.build()
 
             val node = loader.load()
-            val newConfig = node.get(oldCache.data::class.java)
 
-            if (newConfig != null) {
-                configCache[cacheKey] = CachedConfig(newConfig)
-                logger.info("Config reloaded successfully: $cacheKey")
-
-                reloadListeners[cacheKey]?.forEach {
-                    try {
-                        it(newConfig)
-                    } catch (e: Exception) {
-                        logger.error("Error in reload listener: ${e.message}", e)
-                    }
+            listeners.forEach { listener ->
+                try {
+                    listener(node)
+                } catch (e: Exception) {
+                    logger.error("Error in reload listener for $cacheKey: ${e.message}", e)
                 }
-            } else {
-                logger.warn("Reloaded config is null, keeping cached version: $cacheKey")
             }
+
+            logger.info("Config reloaded successfully: $cacheKey")
+
         } catch (e: ParsingException) {
-            logger.error("Failed to parse changed config file, keeping cached version: $cacheKey", e)
-            throw e
+            logger.error("Failed to parse changed config file: $cacheKey ${e.message}")
         } catch (e: Exception) {
-            logger.error("Failed to reload config, keeping cached version: $cacheKey", e)
-            throw e
+            logger.error("Failed to reload config: $cacheKey ${e.message}", e)
         }
     }
 

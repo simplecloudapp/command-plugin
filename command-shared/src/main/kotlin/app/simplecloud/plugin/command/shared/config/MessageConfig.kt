@@ -66,4 +66,5 @@ data class MessageConfig(
     val invalidValue: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#dc2626>Invalid value <color:#a3a3a3><value> <color:#dc2626>for <color:#a3a3a3><key>.",
     val invalidSetting: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#dc2626>Invalid setting <color:#a3a3a3><key>.",
     val errorMessage: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#dc2626>Error: <color:#a3a3a3><error>",
+    val featureUnavailableMessage: String = "<color:#38bdf8><bold>⚡</bold></color> <color:#dc2626>This feature is currently not available."
 )
