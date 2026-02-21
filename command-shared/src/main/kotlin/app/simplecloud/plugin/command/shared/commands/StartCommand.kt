@@ -1,11 +1,9 @@
 package app.simplecloud.plugin.command.shared.commands
 
 import app.simplecloud.api.CloudApi
-import app.simplecloud.api.server.StartServerRequest
 import app.simplecloud.plugin.command.shared.CloudSender
 import app.simplecloud.plugin.command.shared.CommandPlugin
 import app.simplecloud.plugin.command.shared.miniMessage
-import app.simplecloud.plugin.command.shared.resolver.GroupTagResolver
 import app.simplecloud.plugin.command.shared.resolver.PersistentServerTagResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,32 +23,32 @@ class StartCommand(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun <C : CloudSender> register(commandManager: CommandManager<C>) {
-        commandManager.command(
-            commandManager.commandBuilder("cloud")
-                .literal("start")
-                .literal("group")
-                .required("group", stringParser()) { _, _ ->
-                    api.group().allGroups
-                        .thenApply { groups ->
-                            groups.map { Suggestion.suggestion(it.name) }
-                        }
-                        .exceptionally { emptyList() }
-                }
-                .handler { context ->
-                    val groupName = context.get<String>("group")
-                    scope.launch {
-                        try {
-                            val group = api.group().getGroupByName(groupName).await()
-                            api.server().startServer(StartServerRequest(group.serverGroupId, group.name))
-                            context.sender().sendMessage(miniMessage(plugin.messageConfiguration.serverStarting, GroupTagResolver.of(group)))
-                        } catch (e: Exception) {
-                            context.sender().sendMessage(miniMessage(plugin.messageConfiguration.errorMessage, Placeholder.unparsed("error", e.message ?: "Unknown error")))
-                        }
-                    }
-                }
-                .permission(Permission.permission("simplecloud.command.cloud.start.group"))
-                .build()
-        )
+//        commandManager.command(
+//            commandManager.commandBuilder("cloud")
+//                .literal("start")
+//                .literal("group")
+//                .required("group", stringParser()) { _, _ ->
+//                    api.group().allGroups
+//                        .thenApply { groups ->
+//                            groups.map { Suggestion.suggestion(it.name) }
+//                        }
+//                        .exceptionally { emptyList() }
+//                }
+//                .handler { context ->
+//                    val groupName = context.get<String>("group")
+//                    scope.launch {
+//                        try {
+//                            val group = api.group().getGroupByName(groupName).await()
+//                            api.server().startServer(StartServerRequest(group.serverGroupId, group.name))
+//                            context.sender().sendMessage(miniMessage(plugin.messageConfiguration.serverStarting, GroupTagResolver.of(group)))
+//                        } catch (e: Exception) {
+//                            context.sender().sendMessage(miniMessage(plugin.messageConfiguration.errorMessage, Placeholder.unparsed("error", e.message ?: "Unknown error")))
+//                        }
+//                    }
+//                }
+//                .permission(Permission.permission("simplecloud.command.cloud.start.group"))
+//                .build()
+//        )
 
         commandManager.command(
             commandManager.commandBuilder("cloud")
