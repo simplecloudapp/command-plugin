@@ -79,7 +79,8 @@ class PlayerCommand(
                                     )
                                 )
                             }
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                             context.sender().sendMessage(messages.msg(messages.command.error.cloudUnavailable))
                         }
                     }
@@ -305,9 +306,18 @@ class PlayerCommand(
                                 )
                                 return@launch
                             }
-                            val sourceServers = api.server().allServers.await()
-                                .filter { matchesSource(it.serverId, it.group?.name, it.numericalId, source) }
-                            if (sourceServers.isEmpty()) {
+                            val normalServers = api.server().allServers.await()
+                            val persistentServers = api.persistentServer().allPersistentServers.await()
+
+                            val sourceServers = normalServers.filter {
+                                matchesSource(it.serverId, it.group?.name, it.numericalId, source)
+                            }
+
+                            val sourcePersistentServers = persistentServers.filter {
+                                it.persistentServerId.equals(source, true)
+                            }
+
+                            if (sourceServers.isEmpty() && sourcePersistentServers.isEmpty()) {
                                 context.sender().sendMessage(
                                     messages.msg(messages.command.player.error.sourceNotFound, tags("source" to source))
                                 )
@@ -317,7 +327,10 @@ class PlayerCommand(
                             val players = api.player().onlinePlayers.await()
                                 .filter { player ->
                                     sourceServers.any { it.serverId.equals(player.connectedServerName, true) } ||
-                                        sourceNames.any { it.equals(player.connectedServerName, true) }
+                                        sourceNames.any { it.equals(player.connectedServerName, true) } ||
+                                        sourcePersistentServers.any {
+                                            it.persistentServerId.equals(player.connectedServerName, true)
+                                        }
                                 }
                             if (players.isEmpty()) {
                                 context.sender().sendMessage(
@@ -432,17 +445,10 @@ class PlayerCommand(
             }
 
             targetType.equals("ps", true) -> {
-                val servers = api.server().allServers.await()
-                    .filter { !it.isFromGroup && (it.persistentServer?.name == target || it.persistentServerId == target) }
-                val identifiers = servers.flatMap { server ->
-                    listOf(
-                        server.serverId,
-                        "${server.group?.name ?: server.serverGroupId} ${server.numericalId}",
-                        "${server.group?.name ?: server.serverGroupId}-${server.numericalId}"
-                    )
-                }.toSet()
+                val servers = api.persistentServer().allPersistentServers.await()
+                    .filter { it.persistentServerId == target }
                 players.filter { player ->
-                    identifiers.any { it.equals(player.connectedServerName, true) }
+                    servers.any { it.persistentServerId.equals(player.connectedServerName, true) }
                 }
             }
 
