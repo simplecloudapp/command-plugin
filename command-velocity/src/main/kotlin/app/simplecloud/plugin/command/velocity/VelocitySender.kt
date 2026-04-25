@@ -16,4 +16,8 @@ class VelocitySender(private val commandSource: CommandSource) : CloudSender {
     override fun sendMessage(message: Component) {
         commandSource.sendMessage(message)
     }
+
+    override fun hasPermission(permission: String): Boolean {
+        return commandSource.hasPermission(permission)
+    }
 }

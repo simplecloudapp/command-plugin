@@ -6,7 +6,7 @@ shadow = "9.3.1"
 kapt = "2.1.20"
 minotaur = "2.8.10"
 
-simplecloud-api = "0.1.0-platform.20-dev.1771710355025-becd984"
+simplecloud-api = "0.1.0-platform.29-dev.1776936118022-c717659"
 
 cloud-core = "2.0.0"
 cloud-velocity = "2.0.0-beta.10"

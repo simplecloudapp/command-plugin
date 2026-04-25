@@ -16,4 +16,8 @@ class BungeeCordSender(private val commandSender: CommandSender, private val plu
     override fun sendMessage(message: Component) {
         plugin.adventure().sender(commandSender).sendMessage(message)
     }
+
+    override fun hasPermission(permission: String): Boolean {
+        return commandSender.hasPermission(permission)
+    }
 }
