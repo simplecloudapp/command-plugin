@@ -7,6 +7,7 @@ kapt = "2.1.20"
 minotaur = "2.8.10"
 
 simplecloud-api = "0.1.0-platform.29-dev.1776936118022-c717659"
+simplecloud-plugin = "0.0.1-platform.1776615774559-382b07e"
 
 cloud-core = "2.0.0"
 cloud-velocity = "2.0.0-beta.10"
@@ -28,6 +29,7 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
 simplecloud-api = { module = "app.simplecloud.api:api", version.ref = "simplecloud-api" }
+simplecloud-plugin = { module = "app.simplecloud.plugin:plugin-shared", version.ref = "simplecloud-plugin" }
 
 cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud-core" }
 cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud-velocity" }
