@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     implementation(project(":command-shared"))
-    implementation(libs.adveture.platform.bungeecord)
+    implementation(libs.adventure.platform.bungeecord)
     implementation(libs.cloud.bungeecord)
     compileOnly(libs.bungeecord.api)
 }
