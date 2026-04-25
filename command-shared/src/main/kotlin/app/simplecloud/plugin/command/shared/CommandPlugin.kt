@@ -1,15 +1,24 @@
 package app.simplecloud.plugin.command.shared
 
+import app.simplecloud.plugin.api.shared.config.ConfigurationFactory
 import app.simplecloud.plugin.command.shared.config.MessageConfig
-import app.simplecloud.plugin.command.shared.config.YamlConfig
+import java.nio.file.Path
 
 /**
  * @author Fynn Bauer in 2024
  */
 open class CommandPlugin(
-    dirPath: String
+    dirPath: Path
 ) {
-    val config = YamlConfig(dirPath)
+    val config = ConfigurationFactory(
+        dirPath.resolve("messages.yml").toFile(),
+        MessageConfig::class.java,
+    )
+
     val messageConfiguration: MessageConfig
-        get() = config.load<MessageConfig>("messages") ?: MessageConfig()
+        get() = config.get()
+
+    fun loadConfig() {
+        config.loadOrCreate(MessageConfig())
+    }
 }

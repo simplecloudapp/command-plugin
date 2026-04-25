@@ -14,13 +14,15 @@ class ReloadCommand(
             commandManager.commandBuilder("cloud")
                 .literal("reload")
                 .handler { context ->
-                    val messages = plugin.messageConfiguration
+                    // We don't initialize a variable here to use the new config values in the message configuration
                     runCatching {
-                        plugin.messageConfiguration
+                        // TODO: reload
+                        //plugin.config.reload()
                     }.onSuccess {
-                        context.sender().sendMessage(messages.msg(messages.command.reload.success))
+                        context.sender().sendMessage(plugin.messageConfiguration.msg(plugin.messageConfiguration.command.reload.success))
                     }.onFailure {
-                        context.sender().sendMessage(messages.msg(messages.command.reload.failed))
+
+                        context.sender().sendMessage(plugin.messageConfiguration.msg(plugin.messageConfiguration.command.reload.failed))
                     }
                 }
                 .permission(Permission.permission(CommandPermission.RELOAD))

@@ -9,6 +9,7 @@ import net.md_5.bungee.api.plugin.Plugin
 import org.incendo.cloud.SenderMapper
 import org.incendo.cloud.bungee.BungeeCommandManager
 import org.incendo.cloud.execution.ExecutionCoordinator
+import kotlin.io.path.createDirectories
 
 /**
  * @author Fynn Bauer in 2024
@@ -21,9 +22,9 @@ class BungeeCordPlugin : Plugin() {
     private val adventure = BungeeAudiences.create(this)
 
     override fun onEnable() {
-        commandPlugin = CommandPlugin(this.dataFolder.path)
-
-        commandPlugin.config.save("messages", commandPlugin.messageConfiguration)
+        commandPlugin = CommandPlugin(this.dataFolder.toPath())
+        this.dataFolder.mkdirs()
+        commandPlugin.loadConfig()
 
         val executionCoordinator = ExecutionCoordinator.simpleCoordinator<CloudSender>()
 
@@ -44,7 +45,6 @@ class BungeeCordPlugin : Plugin() {
 
     override fun onDisable() {
         adventure.close()
-        commandPlugin.config.close()
     }
 
     fun adventure(): BungeeAudiences {

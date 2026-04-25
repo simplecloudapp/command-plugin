@@ -3,3 +3,32 @@ version: 1.0.0
 author: Kaseax
 main: app.simplecloud.plugin.command.bungeecord.BungeeCordPlugin
 depends: [simplecloud-api]
+permissions:
+  simplecloud.command.use:
+    default: false
+  simplecloud.command.group.list:
+    default: false
+  simplecloud.command.group.info:
+    default: false
+  simplecloud.command.group.start:
+    default: false
+  simplecloud.command.group.stop:
+    default: false
+  simplecloud.command.server.list:
+    default: false
+  simplecloud.command.server.info:
+    default: false
+  simplecloud.command.server.start:
+    default: false
+  simplecloud.command.server.stop:
+    default: false
+  simplecloud.command.player.list:
+    default: false
+  simplecloud.command.player.info:
+    default: false
+  simplecloud.command.player.send:
+    default: false
+  simplecloud.command.player.message:
+    default: false
+  simplecloud.command.reload:
+    default: false

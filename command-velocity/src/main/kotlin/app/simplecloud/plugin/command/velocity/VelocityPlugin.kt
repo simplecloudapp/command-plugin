@@ -17,6 +17,7 @@ import org.incendo.cloud.SenderMapper
 import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.velocity.VelocityCommandManager
 import java.nio.file.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
 
 /**
@@ -38,13 +39,14 @@ class VelocityPlugin @Inject constructor(
     private val server: ProxyServer,
     @DataDirectory val dataDirectory: Path,
     private val pluginContainer: PluginContainer
-): CommandPlugin(dataDirectory.pathString) {
+): CommandPlugin(dataDirectory) {
 
     private lateinit var commandManager: VelocityCommandManager<CloudSender>
 
     @Subscribe
     fun onProxyInitialization(event: ProxyInitializeEvent) {
-        config.save("messages", messageConfiguration)
+        dataDirectory.createDirectories()
+        loadConfig()
 
         val executionCoordinator = ExecutionCoordinator.simpleCoordinator<CloudSender>()
 
@@ -62,10 +64,5 @@ class VelocityPlugin @Inject constructor(
 
         val cloudCommandHandler = CloudCommandHandler(commandManager, this)
         cloudCommandHandler.createCloudCommand()
-    }
-
-    @Subscribe
-    fun onProxyShutdown(event: ProxyShutdownEvent) {
-        config.close()
     }
 }
