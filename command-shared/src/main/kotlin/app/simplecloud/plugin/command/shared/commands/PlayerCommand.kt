@@ -36,7 +36,7 @@ class PlayerCommand(
 
     private fun <C : CloudSender> registerList(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("player")
                 .literal("list")
                 .required("targetType", stringParser()) { _, _ ->
@@ -91,11 +91,11 @@ class PlayerCommand(
 
     private fun <C : CloudSender> registerInfo(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("player")
                 .literal("info")
                 .required("player", stringParser()) { _, _ ->
-                    api.player().getOnlinePlayers().thenApply { players ->
+                    api.player().onlinePlayers.thenApply { players ->
                         players.map { Suggestion.suggestion(it.name) }
                     }.exceptionally { emptyList() }
                 }
@@ -144,11 +144,11 @@ class PlayerCommand(
 
     private fun <C : CloudSender> registerSend(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("player")
                 .literal("send")
                 .required("player", stringParser()) { _, _ ->
-                    api.player().getOnlinePlayers().thenApply { players ->
+                    api.player().onlinePlayers.thenApply { players ->
                         players.map { Suggestion.suggestion(it.name) }
                     }.exceptionally { emptyList() }
                 }
@@ -229,7 +229,7 @@ class PlayerCommand(
 
     private fun <C : CloudSender> registerSendAll(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("player")
                 .literal("sendall")
                 .required("targetType", stringParser()) { _, _ ->
@@ -252,7 +252,7 @@ class PlayerCommand(
                                 )
                                 return@launch
                             }
-                            val players = api.player().getOnlinePlayers().await()
+                            val players = api.player().onlinePlayers.await()
                             var success = 0
                             players.forEach { player ->
                                 if (player.connect(target).await().name == "SUCCESS") {
@@ -280,7 +280,7 @@ class PlayerCommand(
 
     private fun <C : CloudSender> registerSendFrom(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("player")
                 .literal("sendfrom")
                 .required("source", stringParser())
@@ -314,7 +314,7 @@ class PlayerCommand(
                                 return@launch
                             }
                             val sourceNames = sourceServers.map { "${it.group?.name ?: it.serverGroupId} ${it.numericalId}" }.toSet()
-                            val players = api.player().getOnlinePlayers().await()
+                            val players = api.player().onlinePlayers.await()
                                 .filter { player ->
                                     sourceServers.any { it.serverId.equals(player.connectedServerName, true) } ||
                                         sourceNames.any { it.equals(player.connectedServerName, true) }
@@ -355,11 +355,11 @@ class PlayerCommand(
 
     private fun <C : CloudSender> registerMessage(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("player")
                 .literal("message")
                 .required("player", stringParser()) { _, _ ->
-                    api.player().getOnlinePlayers().thenApply { players ->
+                    api.player().onlinePlayers.thenApply { players ->
                         players.map { Suggestion.suggestion(it.name) }
                     }.exceptionally { emptyList() }
                 }
@@ -415,7 +415,7 @@ class PlayerCommand(
     }
 
     private suspend fun playersForTarget(targetType: String, target: String): List<CloudPlayer> {
-        val players = api.player().getOnlinePlayers().await()
+        val players = api.player().onlinePlayers.await()
         return when {
             targetType.equals("group", true) -> {
                 val servers = api.server().getServersByGroup(target).await()

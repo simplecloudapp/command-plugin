@@ -15,7 +15,7 @@ class CloudCommandHandler<C : CloudSender>(
 
     fun createCloudCommand() {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .handler { context: CommandContext<C> ->
                     val messages = commandPlugin.messageConfiguration
                     val entries = listOf(

@@ -16,6 +16,7 @@ allprojects {
     version = if (commitHash != null) snapshotversion else baseVersion
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven("https://buf.build/gen/maven")
         maven("https://repo.simplecloud.app/snapshots")

@@ -11,7 +11,7 @@ class ReloadCommand(
 ) {
     fun <C : CloudSender> register(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("reload")
                 .handler { context ->
                     // We don't initialize a variable here to use the new config values in the message configuration

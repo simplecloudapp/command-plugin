@@ -27,7 +27,7 @@ import kotlin.io.path.pathString
 @Plugin(
     id = "command-plugin",
     name = "SimpleCloud Command Plugin",
-    authors = ["Kaseax"],
+    authors = ["SimpleCloud Maintainers"],
     version = "1.0.0",
     dependencies = [
         Dependency(

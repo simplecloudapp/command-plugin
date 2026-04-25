@@ -32,7 +32,7 @@ class GroupCommand(
 
     private fun <C : CloudSender> registerList(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("group")
                 .literal("list")
                 .handler { context ->
@@ -68,7 +68,7 @@ class GroupCommand(
 
     private fun <C : CloudSender> registerInfo(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("group")
                 .literal("info")
                 .required("group", stringParser()) { _, _ ->
@@ -119,7 +119,7 @@ class GroupCommand(
 
     private fun <C : CloudSender> registerStart(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("group")
                 .literal("start")
                 .required("group", stringParser()) { _, _ ->
@@ -174,7 +174,7 @@ class GroupCommand(
 
     private fun <C : CloudSender> registerStop(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("group")
                 .literal("stop")
                 .required("group", stringParser()) { _, _ ->

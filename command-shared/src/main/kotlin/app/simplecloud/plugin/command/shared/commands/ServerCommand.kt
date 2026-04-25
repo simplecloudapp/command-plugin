@@ -31,7 +31,7 @@ class ServerCommand(
 
     private fun <C : CloudSender> registerList(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("server")
                 .literal("list")
                 .optional("group", stringParser()) { _, _ ->
@@ -75,7 +75,7 @@ class ServerCommand(
 
     private fun <C : CloudSender> registerInfo(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("server")
                 .literal("info")
                 .required("group", stringParser()) { _, _ ->
@@ -102,7 +102,7 @@ class ServerCommand(
                                 )
                                 return@launch
                             }
-                            val serverName = "${groupName} $id"
+                            val serverName = "$groupName $id"
                             context.sender().sendMessage(
                                 messages.msg(messages.command.server.info.title, tags("server" to serverName))
                             )
@@ -133,7 +133,7 @@ class ServerCommand(
 
     private fun <C : CloudSender> registerStart(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("server")
                 .literal("start")
                 .required("group", stringParser()) { _, _ ->
@@ -154,7 +154,7 @@ class ServerCommand(
                                 return@launch
                             }
                             try {
-                                val server = api.group().requestServerStart(group.serverGroupId).await()
+                                api.group().requestServerStart(group.serverGroupId).await()
                                 context.sender().sendMessage(
                                     messages.msg(messages.command.server.start.success, tags("group" to group.name))
                                 )
@@ -178,7 +178,7 @@ class ServerCommand(
 
     private fun <C : CloudSender> registerStop(commandManager: CommandManager<C>) {
         commandManager.command(
-            commandManager.commandBuilder("cloud")
+            commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("server")
                 .literal("stop")
                 .required("group", stringParser()) { _, _ ->

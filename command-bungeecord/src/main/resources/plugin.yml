@@ -1,6 +1,6 @@
 name: CommandPlugin
 version: 1.0.0
-author: Kaseax
+author: SimpleCloud Maintainers
 main: app.simplecloud.plugin.command.bungeecord.BungeeCordPlugin
 depends: [simplecloud-api]
 permissions:
