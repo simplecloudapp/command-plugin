@@ -1,6 +1,7 @@
 package app.simplecloud.plugin.command.shared.commands
 
 import app.simplecloud.api.CloudApi
+import app.simplecloud.api.server.Server
 import app.simplecloud.plugin.command.shared.CloudSender
 import app.simplecloud.plugin.command.shared.CommandPermission
 import app.simplecloud.plugin.command.shared.CommandPlugin
@@ -57,7 +58,7 @@ class ServerCommand(
                                 messages.msg(messages.command.server.list.title, tags("count" to servers.size))
                             )
                             servers.forEach { server ->
-                                val serverName = "${server.group?.name ?: server.serverGroupId} ${server.numericalId}"
+                                val serverName = server.displayName()
                                 val value = "${server.playerCount ?: 0}/${server.maxPlayers} - ${server.state.name.lowercase()}"
                                 context.sender().sendMessage(
                                     messages.msg(messages.command.server.list.entry, tags("server" to serverName, "value" to value))
@@ -71,6 +72,18 @@ class ServerCommand(
                 .permission(Permission.permission(CommandPermission.SERVER_LIST))
                 .build()
         )
+    }
+
+    private fun Server.displayName(): String {
+        val groupName = group?.name?.takeUnless { it.isBlank() }
+            ?: serverGroupId?.takeUnless { it.isBlank() }
+        if (groupName != null) {
+            return "$groupName $numericalId"
+        }
+
+        return persistentServer?.name?.takeUnless { it.isBlank() }
+            ?: persistentServerId?.takeUnless { it.isBlank() }
+            ?: serverId
     }
 
     private fun <C : CloudSender> registerInfo(commandManager: CommandManager<C>) {
