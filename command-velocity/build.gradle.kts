@@ -1,4 +1,5 @@
 plugins {
+    kotlin("kapt")
     alias(libs.plugins.minotaur)
 }
 
@@ -6,7 +7,6 @@ dependencies {
     implementation(project(":command-shared"))
     implementation(libs.cloud.velocity)
     compileOnly(libs.velocity.api)
-
     kapt(libs.velocity.api)
 }
 
