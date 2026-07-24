@@ -29,6 +29,7 @@ simplecloud-api = { module = "app.simplecloud.api:api", version.ref = "simpleclo
 simplecloud-plugin = { module = "app.simplecloud.plugin:plugin-shared", version.ref = "simplecloud-plugin" }
 
 cloud-core = { module = "org.incendo:cloud-core", version.ref = "cloud-core" }
+cloud-coroutines = { module = "org.incendo:cloud-kotlin-coroutines", version.ref = "cloud-core" }
 cloud-velocity = { module = "org.incendo:cloud-velocity", version.ref = "cloud-velocity" }
 cloud-bungeecord = { module = "org.incendo:cloud-bungee", version.ref = "cloud-bungeecord" }
 
@@ -44,6 +45,7 @@ configurate-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", ve
 
 [bundles]
 configurate = ["configurate-kotlin", "configurate-yaml"]
+cloud-command = ["cloud-core", "cloud-coroutines"]
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
