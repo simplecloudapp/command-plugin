@@ -1,13 +1,14 @@
-package app.simplecloud.plugin.command.bungeecord
+package app.simplecloud.plugin.command.bungeecord.command
 
-import app.simplecloud.plugin.command.shared.CloudSender
+import app.simplecloud.plugin.command.bungeecord.BungeeCordPlugin
+import app.simplecloud.plugin.command.shared.command.CloudSender
 import net.kyori.adventure.text.Component
 import net.md_5.bungee.api.CommandSender
 
 /**
  * @author Fynn Bauer in 2024
  */
-class BungeeCordSender(private val commandSender: CommandSender, private val plugin: BungeeCordPlugin): CloudSender {
+class BungeeCloudSender(private val commandSender: CommandSender, private val plugin: BungeeCordPlugin): CloudSender {
 
     fun getCommandSender(): CommandSender {
         return commandSender

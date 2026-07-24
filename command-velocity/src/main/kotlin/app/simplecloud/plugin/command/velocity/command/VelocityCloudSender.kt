@@ -1,13 +1,13 @@
-package app.simplecloud.plugin.command.velocity
+package app.simplecloud.plugin.command.velocity.command
 
-import app.simplecloud.plugin.command.shared.CloudSender
+import app.simplecloud.plugin.command.shared.command.CloudSender
 import com.velocitypowered.api.command.CommandSource
 import net.kyori.adventure.text.Component
 
 /**
  * @author Fynn Bauer in 2024
  */
-class VelocitySender(private val commandSource: CommandSource) : CloudSender {
+class VelocityCloudSender(private val commandSource: CommandSource) : CloudSender {
 
     fun getCommandSource(): CommandSource {
         return commandSource

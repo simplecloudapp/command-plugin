@@ -1,4 +1,4 @@
-package app.simplecloud.plugin.command.shared
+package app.simplecloud.plugin.command.shared.utilities
 
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver

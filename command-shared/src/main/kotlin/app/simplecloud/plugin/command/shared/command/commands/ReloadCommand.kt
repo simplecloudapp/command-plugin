@@ -1,9 +1,10 @@
-package app.simplecloud.plugin.command.shared.commands
+package app.simplecloud.plugin.command.shared.command.commands
 
-import app.simplecloud.plugin.command.shared.CloudSender
-import app.simplecloud.plugin.command.shared.CommandPermission
+import app.simplecloud.plugin.command.shared.command.CloudSender
+import app.simplecloud.plugin.command.shared.utilities.CommandPermissions
 import app.simplecloud.plugin.command.shared.CommandPlugin
 import org.incendo.cloud.CommandManager
+import org.incendo.cloud.kotlin.coroutines.extension.suspendingHandler
 import org.incendo.cloud.permission.Permission
 
 class ReloadCommand(
@@ -13,19 +14,16 @@ class ReloadCommand(
         commandManager.command(
             commandManager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("reload")
-                .handler { context ->
-                    // We don't initialize a variable here to use the new config values in the message configuration
+                .suspendingHandler { context ->
                     runCatching {
-                        // TODO: reload
-                        //plugin.config.reload()
+                        plugin.config.reload()
                     }.onSuccess {
                         context.sender().sendMessage(plugin.messageConfiguration.msg(plugin.messageConfiguration.command.reload.success))
                     }.onFailure {
-
                         context.sender().sendMessage(plugin.messageConfiguration.msg(plugin.messageConfiguration.command.reload.failed))
                     }
                 }
-                .permission(Permission.permission(CommandPermission.RELOAD))
+                .permission(Permission.permission(CommandPermissions.RELOAD))
                 .build()
         )
     }

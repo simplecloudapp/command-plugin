@@ -1,8 +1,10 @@
-name: CommandPlugin
-version: 1.0.0
+name: simplecloud-command
+version: ${version}
 author: SimpleCloud Maintainers
+description: Proxy commands for managing groups, servers, and players across the network
 main: app.simplecloud.plugin.command.bungeecord.BungeeCordPlugin
 depends: [simplecloud-api]
+
 permissions:
   simplecloud.command.use:
     default: false

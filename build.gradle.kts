@@ -1,78 +1,62 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.shadow)
-    alias(libs.plugins.kapt)
-    `maven-publish`
 }
 
-val baseVersion = "0.0.4"
-val commitHash = System.getenv("COMMIT_HASH")
-val snapshotversion = "${baseVersion}-dev.$commitHash"
-
 allprojects {
-    group = "app.simplecloud.plugin.command"
-    version = if (commitHash != null) snapshotversion else baseVersion
+    group = "app.simplecloud.plugin"
+    version = "0.0.5"
 
     repositories {
-        mavenLocal()
         mavenCentral()
         maven("https://buf.build/gen/maven")
         maven("https://repo.simplecloud.app/snapshots")
         maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://repo.simplecloud.app/snapshots")
     }
 }
 
 subprojects {
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "com.gradleup.shadow")
-    apply(plugin = "org.jetbrains.kotlin.kapt")
-    apply(plugin = "maven-publish")
+    apply {
+        plugin("kotlin")
+        plugin("com.gradleup.shadow")
+    }
 
     dependencies {
         testImplementation(rootProject.libs.kotlin.test)
-        implementation(rootProject.libs.kotlin.jvm)
         implementation(rootProject.libs.kotlinx.coroutines.core)
     }
 
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                from(components["java"])
-            }
+    kotlin {
+        jvmToolchain(25)
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_25
+            languageVersion = KotlinVersion.KOTLIN_2_4
+            apiVersion = KotlinVersion.KOTLIN_2_4
         }
     }
 
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(25))
     }
 
-    kotlin {
-        jvmToolchain(21)
-        compilerOptions {
-            apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    tasks.test {
+        useJUnitPlatform()
+    }
+
+    tasks.shadowJar {
+        mergeServiceFiles()
+        archiveFileName.set("${project.name}.jar")
+    }
+
+    tasks.processResources {
+        filesMatching("plugin.yml") {
+            expand(
+                "version" to project.version
+            )
         }
     }
 
-    tasks.named("shadowJar", ShadowJar::class) {
-        mergeServiceFiles()
-        relocate("org.incendo", "app.simplecloud.plugin.command.relocate.incendo")
-        relocate("org.spongepowered", "app.simplecloud.plugin.command.relocate.spongepowered")
-        archiveFileName.set("${project.name}.jar")
-        archiveClassifier.set("")
-    }
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-tasks.processResources {
-    expand(
-        "version" to project.version,
-        "name" to project.name
-    )
 }
