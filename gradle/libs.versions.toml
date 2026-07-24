@@ -21,10 +21,7 @@ adventure-platform-bungeecord = "4.4.1"
 
 configurate = "4.2.0"
 
-log4j = "2.26.1"
-
 [libraries]
-kotlin-jvm = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
@@ -45,12 +42,7 @@ adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", 
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 configurate-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
 
-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
-log4j-slf4j-impl = { module = "org.apache.logging.log4j:log4j-slf4j-impl", version.ref = "log4j" }
-
 [bundles]
-logging = ["log4j-core", "log4j-api", "log4j-slf4j-impl"]
 configurate = ["configurate-kotlin", "configurate-yaml"]
 
 [plugins]

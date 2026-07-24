@@ -4,6 +4,5 @@ dependencies {
     implementation(libs.adventure.api)
     implementation(libs.adventure.text.minimessage)
     implementation(libs.simplecloud.plugin)
-    implementation(libs.bundles.logging)
     implementation(libs.bundles.configurate)
 }
