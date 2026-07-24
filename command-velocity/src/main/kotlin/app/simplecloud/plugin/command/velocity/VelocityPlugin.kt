@@ -1,13 +1,12 @@
 package app.simplecloud.plugin.command.velocity
 
-import app.simplecloud.plugin.command.shared.CloudCommandHandler
-import app.simplecloud.plugin.command.shared.CloudSender
+import app.simplecloud.plugin.command.shared.command.CloudCommandHandler
+import app.simplecloud.plugin.command.shared.command.CloudSender
 import app.simplecloud.plugin.command.shared.CommandPlugin
+import app.simplecloud.plugin.command.velocity.command.VelocityCloudSender
 import com.google.inject.Inject
-import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
-import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Dependency
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.PluginContainer
@@ -17,8 +16,6 @@ import org.incendo.cloud.SenderMapper
 import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.velocity.VelocityCommandManager
 import java.nio.file.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.pathString
 
 /**
  * @author Fynn Bauer in 2024
@@ -30,39 +27,29 @@ import kotlin.io.path.pathString
     authors = ["SimpleCloud Maintainers"],
     version = "1.0.0",
     dependencies = [
-        Dependency(
-            id = "simplecloud-api"
-        )
+        Dependency(id = "simplecloud-api")
     ]
 )
 class VelocityPlugin @Inject constructor(
     private val server: ProxyServer,
     @DataDirectory val dataDirectory: Path,
-    private val pluginContainer: PluginContainer
-): CommandPlugin(dataDirectory) {
+) {
 
-    private lateinit var commandManager: VelocityCommandManager<CloudSender>
+    private val plugin = CommandPlugin(dataDirectory)
 
     @Subscribe
     fun onProxyInitialization(event: ProxyInitializeEvent) {
-        dataDirectory.createDirectories()
-        loadConfig()
-
-        val executionCoordinator = ExecutionCoordinator.simpleCoordinator<CloudSender>()
-
-        val senderMapper = SenderMapper.create<CommandSource, CloudSender>(
-            { commandSender -> VelocitySender(commandSender) },
-            { cloudSender -> (cloudSender as VelocitySender).getCommandSource() }
-        )
-
-        commandManager = VelocityCommandManager(
-            pluginContainer,
-            server,
-            executionCoordinator,
-            senderMapper
-        )
-
-        val cloudCommandHandler = CloudCommandHandler(commandManager, this)
-        cloudCommandHandler.createCloudCommand()
+        plugin.loadConfig()
+        CloudCommandHandler(createCommandManager(), plugin).createCloudCommand()
     }
+
+    private fun createCommandManager(): VelocityCommandManager<VelocityCloudSender> {
+        return VelocityCommandManager(
+            server.pluginManager.ensurePluginContainer(this),
+            server,
+            ExecutionCoordinator.simpleCoordinator(),
+            SenderMapper.create(::VelocityCloudSender, VelocityCloudSender::getCommandSource)
+        )
+    }
+
 }

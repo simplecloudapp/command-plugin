@@ -1,6 +1,6 @@
-package app.simplecloud.plugin.command.shared
+package app.simplecloud.plugin.command.shared.utilities
 
-object CommandPermission {
+object CommandPermissions {
     const val ROOT = "simplecloud.command.use"
     const val GROUP_LIST = "simplecloud.command.group.list"
     const val GROUP_INFO = "simplecloud.command.group.info"

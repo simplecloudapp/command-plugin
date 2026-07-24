@@ -3,6 +3,7 @@ version: 1.0.0
 author: SimpleCloud Maintainers
 main: app.simplecloud.plugin.command.bungeecord.BungeeCordPlugin
 depends: [simplecloud-api]
+
 permissions:
   simplecloud.command.use:
     default: false

@@ -1,4 +1,4 @@
-package app.simplecloud.plugin.command.shared
+package app.simplecloud.plugin.command.shared.command
 
 import net.kyori.adventure.text.Component
 
@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component
 interface CloudSender {
 
     fun sendMessage(message: Component)
+
     fun hasPermission(permission: String): Boolean
 
 }

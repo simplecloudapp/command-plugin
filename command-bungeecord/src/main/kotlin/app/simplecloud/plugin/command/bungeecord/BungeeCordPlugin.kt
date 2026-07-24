@@ -1,46 +1,25 @@
 package app.simplecloud.plugin.command.bungeecord
 
-import app.simplecloud.plugin.command.shared.CloudCommandHandler
-import app.simplecloud.plugin.command.shared.CloudSender
+import app.simplecloud.plugin.command.bungeecord.command.BungeeCloudSender
 import app.simplecloud.plugin.command.shared.CommandPlugin
+import app.simplecloud.plugin.command.shared.command.CloudCommandHandler
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences
-import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.plugin.Plugin
 import org.incendo.cloud.SenderMapper
 import org.incendo.cloud.bungee.BungeeCommandManager
 import org.incendo.cloud.execution.ExecutionCoordinator
-import kotlin.io.path.createDirectories
 
 /**
  * @author Fynn Bauer in 2024
  */
 class BungeeCordPlugin : Plugin() {
 
-    private lateinit var commandManager: BungeeCommandManager<CloudSender>
-    private lateinit var commandPlugin: CommandPlugin
-
+    private val plugin = CommandPlugin(dataFolder.toPath())
     private val adventure = BungeeAudiences.create(this)
 
     override fun onEnable() {
-        commandPlugin = CommandPlugin(this.dataFolder.toPath())
-        this.dataFolder.mkdirs()
-        commandPlugin.loadConfig()
-
-        val executionCoordinator = ExecutionCoordinator.simpleCoordinator<CloudSender>()
-
-        val senderMapper = SenderMapper.create<CommandSender, CloudSender>(
-            { commandSender -> BungeeCordSender(commandSender, this) },
-            { cloudSender -> (cloudSender as BungeeCordSender).getCommandSender() }
-        )
-
-        commandManager = BungeeCommandManager(
-            this,
-            executionCoordinator,
-            senderMapper
-        )
-
-        val cloudCommandHandler = CloudCommandHandler(commandManager, commandPlugin)
-        cloudCommandHandler.createCloudCommand()
+        plugin.loadConfig()
+        CloudCommandHandler(createCommandManager(), plugin).createCloudCommand()
     }
 
     override fun onDisable() {
@@ -50,6 +29,14 @@ class BungeeCordPlugin : Plugin() {
     fun adventure(): BungeeAudiences {
         checkNotNull(this.adventure) { "Cannot retrieve audience provider while plugin is not enabled" }
         return this.adventure
+    }
+
+    private fun createCommandManager(): BungeeCommandManager<BungeeCloudSender> {
+        return BungeeCommandManager(
+            this,
+            ExecutionCoordinator.simpleCoordinator(),
+            SenderMapper.create({ BungeeCloudSender(it, this) }, BungeeCloudSender::getCommandSender)
+        )
     }
 
 }

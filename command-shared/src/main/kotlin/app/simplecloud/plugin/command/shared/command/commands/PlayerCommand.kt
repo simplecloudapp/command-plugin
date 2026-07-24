@@ -1,11 +1,11 @@
-package app.simplecloud.plugin.command.shared.commands
+package app.simplecloud.plugin.command.shared.command.commands
 
 import app.simplecloud.api.CloudApi
 import app.simplecloud.api.player.CloudPlayer
-import app.simplecloud.plugin.command.shared.CloudSender
-import app.simplecloud.plugin.command.shared.CommandPermission
+import app.simplecloud.plugin.command.shared.command.CloudSender
+import app.simplecloud.plugin.command.shared.utilities.CommandPermissions
 import app.simplecloud.plugin.command.shared.CommandPlugin
-import app.simplecloud.plugin.command.shared.tags
+import app.simplecloud.plugin.command.shared.utilities.tags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -85,7 +85,7 @@ class PlayerCommand(
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.PLAYER_LIST))
+                .permission(Permission.permission(CommandPermissions.PLAYER_LIST))
                 .build()
         )
     }
@@ -138,7 +138,7 @@ class PlayerCommand(
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.PLAYER_INFO))
+                .permission(Permission.permission(CommandPermissions.PLAYER_INFO))
                 .build()
         )
     }
@@ -223,7 +223,7 @@ class PlayerCommand(
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.PLAYER_SEND))
+                .permission(Permission.permission(CommandPermissions.PLAYER_SEND))
                 .build()
         )
     }
@@ -274,7 +274,7 @@ class PlayerCommand(
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.PLAYER_SEND))
+                .permission(Permission.permission(CommandPermissions.PLAYER_SEND))
                 .build()
         )
     }
@@ -361,7 +361,7 @@ class PlayerCommand(
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.PLAYER_SEND))
+                .permission(Permission.permission(CommandPermissions.PLAYER_SEND))
                 .build()
         )
     }
@@ -410,7 +410,7 @@ class PlayerCommand(
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.PLAYER_MESSAGE))
+                .permission(Permission.permission(CommandPermissions.PLAYER_MESSAGE))
                 .build()
         )
     }

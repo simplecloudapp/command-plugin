@@ -1,10 +1,11 @@
-package app.simplecloud.plugin.command.shared.commands
+package app.simplecloud.plugin.command.shared.command.commands
 
 import app.simplecloud.api.CloudApi
-import app.simplecloud.plugin.command.shared.CloudSender
-import app.simplecloud.plugin.command.shared.CommandPermission
+import app.simplecloud.api.server.Server
+import app.simplecloud.plugin.command.shared.command.CloudSender
+import app.simplecloud.plugin.command.shared.utilities.CommandPermissions
 import app.simplecloud.plugin.command.shared.CommandPlugin
-import app.simplecloud.plugin.command.shared.tags
+import app.simplecloud.plugin.command.shared.utilities.tags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,9 +16,8 @@ import org.incendo.cloud.parser.standard.IntegerParser.integerParser
 import org.incendo.cloud.parser.standard.StringParser.stringParser
 import org.incendo.cloud.permission.Permission
 import org.incendo.cloud.suggestion.Suggestion
-import java.util.concurrent.CompletableFuture
 
-class GroupCommand(
+class ServerCommand(
     private val api: CloudApi,
     private val plugin: CommandPlugin
 ) {
@@ -33,27 +33,35 @@ class GroupCommand(
     private fun <C : CloudSender> registerList(commandManager: CommandManager<C>) {
         commandManager.command(
             commandManager.commandBuilder("cloud", "sc", "simplecloud")
-                .literal("group")
+                .literal("server")
                 .literal("list")
+                .optional("group", stringParser()) { _, _ ->
+                    api.group().allGroups.thenApply { groups ->
+                        groups.map { Suggestion.suggestion(it.name) }
+                    }.exceptionally { emptyList() }
+                }
                 .handler { context ->
+                    val groupName = context.getOrDefault("group", null as String?)
                     val messages = plugin.messageConfiguration
                     scope.launch {
                         try {
-                            val groups = api.group().allGroups.await()
-                            if (groups.isEmpty()) {
-                                context.sender().sendMessage(messages.msg(messages.command.group.list.empty))
+                            val servers = if (groupName == null) {
+                                api.server().allServers.await()
+                            } else {
+                                api.server().getServersByGroup(groupName).await()
+                            }
+                            if (servers.isEmpty()) {
+                                context.sender().sendMessage(messages.msg(messages.command.server.list.empty))
                                 return@launch
                             }
                             context.sender().sendMessage(
-                                messages.msg(messages.command.group.list.title, tags("count" to groups.size))
+                                messages.msg(messages.command.server.list.title, tags("count" to servers.size))
                             )
-                            groups.forEach { group ->
-                                val serverCount = api.server().getServersByGroup(group.name).await().size
+                            servers.forEach { server ->
+                                val serverName = server.displayName()
+                                val value = "${server.playerCount ?: 0}/${server.maxPlayers} - ${server.state.name.lowercase()}"
                                 context.sender().sendMessage(
-                                    messages.msg(
-                                        messages.command.group.list.entry,
-                                        tags("group" to group.name, "value" to "$serverCount online")
-                                    )
+                                    messages.msg(messages.command.server.list.entry, tags("server" to serverName, "value" to value))
                                 )
                             }
                         } catch (_: Exception) {
@@ -61,58 +69,77 @@ class GroupCommand(
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.GROUP_LIST))
+                .permission(Permission.permission(CommandPermissions.SERVER_LIST))
                 .build()
         )
+    }
+
+    private fun Server.displayName(): String {
+        val groupName = group?.name?.takeUnless { it.isBlank() }
+            ?: serverGroupId?.takeUnless { it.isBlank() }
+        if (groupName != null) {
+            return "$groupName $numericalId"
+        }
+
+        return persistentServer?.name?.takeUnless { it.isBlank() }
+            ?: persistentServerId?.takeUnless { it.isBlank() }
+            ?: serverId
     }
 
     private fun <C : CloudSender> registerInfo(commandManager: CommandManager<C>) {
         commandManager.command(
             commandManager.commandBuilder("cloud", "sc", "simplecloud")
-                .literal("group")
+                .literal("server")
                 .literal("info")
                 .required("group", stringParser()) { _, _ ->
                     api.group().allGroups.thenApply { groups ->
                         groups.map { Suggestion.suggestion(it.name) }
                     }.exceptionally { emptyList() }
                 }
+                .required("id", integerParser()) { context, _ ->
+                    val group = context.get<String>("group")
+                    api.server().getServersByGroup(group).thenApply { servers ->
+                        servers.map { Suggestion.suggestion(it.numericalId.toString()) }
+                    }.exceptionally { emptyList() }
+                }
                 .handler { context ->
                     val groupName = context.get<String>("group")
+                    val id = context.get<Int>("id")
                     val messages = plugin.messageConfiguration
                     scope.launch {
                         try {
-                            val group = api.group().getGroupByName(groupName).await()
-                            if (group == null) {
+                            val server = api.server().getServerByNumericalId(groupName, id).await()
+                            if (server == null) {
                                 context.sender().sendMessage(
-                                    messages.msg(messages.command.group.error.notFound, tags("group" to groupName))
+                                    messages.msg(messages.command.server.error.notFound, tags("group" to groupName, "id" to id))
                                 )
                                 return@launch
                             }
-                            val servers = api.server().getServersByGroup(group.name).await()
+                            val serverName = "$groupName $id"
                             context.sender().sendMessage(
-                                messages.msg(messages.command.group.info.title, tags("group" to group.name))
+                                messages.msg(messages.command.server.info.title, tags("server" to serverName))
                             )
                             context.sender().sendMessage(
-                                messages.msg(messages.command.group.info.entry, tags("key" to "Type", "value" to group.type.name))
+                                messages.msg(messages.command.server.info.entry, tags("key" to "State", "value" to server.state.name))
                             )
                             context.sender().sendMessage(
                                 messages.msg(
-                                    messages.command.group.info.entry,
-                                    tags("key" to "Memory", "value" to "${group.minMemory}-${group.maxMemory} MB")
+                                    messages.command.server.info.entry,
+                                    tags("key" to "Memory", "value" to "${server.minMemory}-${server.maxMemory} MB")
                                 )
                             )
                             context.sender().sendMessage(
-                                messages.msg(messages.command.group.info.entry, tags("key" to "Max Players", "value" to group.maxPlayers))
-                            )
-                            context.sender().sendMessage(
-                                messages.msg(messages.command.group.info.entry, tags("key" to "Running Servers", "value" to servers.size))
+                                messages.msg(
+                                    messages.command.server.info.entry,
+                                    tags("key" to "Players", "value" to "${server.playerCount ?: 0}/${server.maxPlayers}")
+                                )
                             )
                         } catch (_: Exception) {
                             context.sender().sendMessage(messages.msg(messages.command.error.internal))
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.GROUP_INFO))
+                .permission(Permission.permission(CommandPermissions.SERVER_INFO))
                 .build()
         )
     }
@@ -120,22 +147,16 @@ class GroupCommand(
     private fun <C : CloudSender> registerStart(commandManager: CommandManager<C>) {
         commandManager.command(
             commandManager.commandBuilder("cloud", "sc", "simplecloud")
-                .literal("group")
+                .literal("server")
                 .literal("start")
                 .required("group", stringParser()) { _, _ ->
                     api.group().allGroups.thenApply { groups ->
                         groups.map { Suggestion.suggestion(it.name) }
                     }.exceptionally { emptyList() }
                 }
-                .optional("count", integerParser())
                 .handler { context ->
                     val groupName = context.get<String>("group")
-                    val count = context.getOrDefault("count", 1)
                     val messages = plugin.messageConfiguration
-                    if (count <= 0) {
-                        context.sender().sendMessage(messages.msg(messages.command.usage.invalidNumber, tags("value" to count)))
-                        return@handler
-                    }
                     scope.launch {
                         try {
                             val group = api.group().getGroupByName(groupName).await()
@@ -146,28 +167,24 @@ class GroupCommand(
                                 return@launch
                             }
                             try {
-                                repeat(count) {
-                                    api.group().requestServerStart(group.serverGroupId).await()
-                                }
+                                api.group().requestServerStart(group.serverGroupId).await()
                                 context.sender().sendMessage(
-                                    messages.msg(messages.command.group.start.success, tags("count" to count, "group" to group.name))
+                                    messages.msg(messages.command.server.start.success, tags("group" to group.name))
                                 )
                             } catch (_: Exception) {
-                                repeat(count) {
-                                    api.group().requestServerStart(group).await()
-                                }
+                                api.group().requestServerStart(group).await()
                                 context.sender().sendMessage(
-                                    messages.msg(messages.command.group.start.queued, tags("group" to group.name))
+                                    messages.msg(messages.command.server.start.queued, tags("group" to group.name, "id" to "?"))
                                 )
                             }
                         } catch (_: Exception) {
                             context.sender().sendMessage(
-                                messages.msg(messages.command.group.error.startFailed, tags("group" to groupName))
+                                messages.msg(messages.command.server.error.startFailed, tags("group" to groupName, "id" to "?"))
                             )
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.GROUP_START))
+                .permission(Permission.permission(CommandPermissions.SERVER_START))
                 .build()
         )
     }
@@ -175,69 +192,50 @@ class GroupCommand(
     private fun <C : CloudSender> registerStop(commandManager: CommandManager<C>) {
         commandManager.command(
             commandManager.commandBuilder("cloud", "sc", "simplecloud")
-                .literal("group")
+                .literal("server")
                 .literal("stop")
                 .required("group", stringParser()) { _, _ ->
                     api.group().allGroups.thenApply { groups ->
                         groups.map { Suggestion.suggestion(it.name) }
                     }.exceptionally { emptyList() }
                 }
-                .optional("id", integerParser()) { context, _ ->
-                    try {
-                        val group = context.get<String>("group")
-                        api.server().getServersByGroup(group).thenApply { servers ->
-                            servers.map { Suggestion.suggestion(it.numericalId.toString()) }
-                        }.exceptionally { emptyList() }
-                    } catch (_: Exception) {
-                        CompletableFuture.completedFuture(emptyList())
-                    }
+                .required("id", integerParser()) { context, _ ->
+                    val group = context.get<String>("group")
+                    api.server().getServersByGroup(group).thenApply { servers ->
+                        servers.map { Suggestion.suggestion(it.numericalId.toString()) }
+                    }.exceptionally { emptyList() }
                 }
                 .handler { context ->
                     val groupName = context.get<String>("group")
-                    val id = context.getOrDefault("id", null as Int?)
+                    val id = context.get<Int>("id")
                     val messages = plugin.messageConfiguration
                     scope.launch {
                         try {
-                            val group = api.group().getGroupByName(groupName).await()
-                            if (group == null) {
+                            val server = api.server().getServerByNumericalId(groupName, id).await()
+                            if (server == null) {
                                 context.sender().sendMessage(
-                                    messages.msg(messages.command.group.error.notFound, tags("group" to groupName))
+                                    messages.msg(messages.command.server.error.notFound, tags("group" to groupName, "id" to id))
                                 )
                                 return@launch
                             }
-                            val servers = api.server().getServersByGroup(group.name).await()
-                            if (servers.isEmpty()) {
+                            if (server.state.name.equals("STOPPING", true)) {
                                 context.sender().sendMessage(
-                                    messages.msg(messages.command.group.error.alreadyEmpty, tags("group" to group.name))
+                                    messages.msg(messages.command.server.error.alreadyStopped, tags("group" to groupName, "id" to id))
                                 )
                                 return@launch
                             }
-                            if (id != null) {
-                                val server = servers.find { it.numericalId == id }
-                                if (server == null) {
-                                    context.sender().sendMessage(
-                                        messages.msg(messages.command.server.error.notFound, tags("group" to group.name, "id" to id))
-                                    )
-                                    return@launch
-                                }
-                                api.server().stopServer(server.serverId).await()
-                                context.sender().sendMessage(
-                                    messages.msg(messages.command.group.stop.successWithIds, tags("group" to group.name, "ids" to id))
-                                )
-                            } else {
-                                servers.forEach { api.server().stopServer(it.serverId).await() }
-                                context.sender().sendMessage(
-                                    messages.msg(messages.command.group.stop.success, tags("group" to group.name))
-                                )
-                            }
+                            api.server().stopServer(server.serverId).await()
+                            context.sender().sendMessage(
+                                messages.msg(messages.command.server.stop.success, tags("group" to groupName, "id" to id))
+                            )
                         } catch (_: Exception) {
                             context.sender().sendMessage(
-                                messages.msg(messages.command.group.error.stopFailed, tags("group" to groupName))
+                                messages.msg(messages.command.server.error.stopFailed, tags("group" to groupName, "id" to id))
                             )
                         }
                     }
                 }
-                .permission(Permission.permission(CommandPermission.GROUP_STOP))
+                .permission(Permission.permission(CommandPermissions.SERVER_STOP))
                 .build()
         )
     }
