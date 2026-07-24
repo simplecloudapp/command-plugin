@@ -1,6 +1,7 @@
 plugins {
     kotlin("kapt")
     alias(libs.plugins.minotaur)
+    alias(libs.plugins.blossom)
 }
 
 dependencies {
@@ -44,4 +45,14 @@ modrinth {
     loaders.add("velocity")
     changelog.set("https://docs.simplecloud.app/changelog")
     syncBodyFrom.set(rootProject.file("README.md").readText())
+}
+
+sourceSets {
+    main {
+        blossom {
+            kotlinSources {
+                property("version", project.version.toString())
+            }
+        }
+    }
 }

@@ -25,7 +25,7 @@ import java.nio.file.Path
     id = "command-plugin",
     name = "SimpleCloud Command Plugin",
     authors = ["SimpleCloud Maintainers"],
-    version = "1.0.0",
+    version = BuildConstants.VERSION,
     dependencies = [
         Dependency(id = "simplecloud-api")
     ]

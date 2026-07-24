@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "app.simplecloud.plugin"
-    version = "1.0.0"
+    version = "0.0.5"
 
     repositories {
         mavenCentral()
@@ -26,7 +26,6 @@ subprojects {
 
     dependencies {
         testImplementation(rootProject.libs.kotlin.test)
-        implementation(rootProject.libs.kotlin.jvm)
         implementation(rootProject.libs.kotlinx.coroutines.core)
     }
 
