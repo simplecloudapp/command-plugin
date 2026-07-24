@@ -27,7 +27,6 @@ class BungeeCordPlugin : Plugin() {
     }
 
     fun adventure(): BungeeAudiences {
-        checkNotNull(this.adventure) { "Cannot retrieve audience provider while plugin is not enabled" }
         return this.adventure
     }
 

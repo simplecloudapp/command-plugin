@@ -169,7 +169,7 @@ class ServerCommand(
                             try {
                                 api.group().requestServerStart(group.serverGroupId).await()
                                 context.sender().sendMessage(
-                                    messages.msg(messages.command.server.start.success, tags("group" to group.name))
+                                    messages.msg(messages.command.server.start.success, tags("group" to group.name, "id" to "?"))
                                 )
                             } catch (_: Exception) {
                                 api.group().requestServerStart(group).await()
