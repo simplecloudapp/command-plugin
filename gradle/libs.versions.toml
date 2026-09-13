@@ -1,20 +1,20 @@
 [versions]
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 kotlinx-coroutines = "1.11.0"
 
-shadow = "9.5.1"
+shadow = "9.6.1"
 minotaur = "2.9.0"
 blossom = "2.2.0"
 
-simplecloud-api = "0.1.0-platform.40"
+simplecloud-api = "0.1.0-platform.54-dev.1.1-770dcc6"
 simplecloud-plugin = "0.0.1-platform.1778966459069-b1e45e2"
 
 velocity = "4.1.0-SNAPSHOT"
 bungeecord-api = "1.21-R0.4"
 
-cloud-core = "2.0.0"
-cloud-velocity = "2.0.0-beta.10"
-cloud-bungeecord = "2.0.0-beta.10"
+cloud-core = "2.1.0"
+cloud-velocity = "2.0.0"
+cloud-bungeecord = "2.0.0"
 
 adventure-api = "5.2.0"
 adventure-platform-bungeecord = "4.4.1"

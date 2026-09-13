@@ -7,12 +7,13 @@ import org.incendo.cloud.CommandManager
 import org.incendo.cloud.kotlin.coroutines.extension.suspendingHandler
 import org.incendo.cloud.permission.Permission
 
-class ReloadCommand(
-    private val plugin: CommandPlugin
+class ReloadCommand<C : CloudSender>(
+    private val plugin: CommandPlugin,
+    private val manager: CommandManager<C>
 ) {
-    fun <C : CloudSender> register(commandManager: CommandManager<C>) {
-        commandManager.command(
-            commandManager.commandBuilder("cloud", "sc", "simplecloud")
+    fun register() {
+        manager.command(
+            manager.commandBuilder("cloud", "sc", "simplecloud")
                 .literal("reload")
                 .suspendingHandler { context ->
                     runCatching {
