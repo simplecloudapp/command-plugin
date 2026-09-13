@@ -39,7 +39,7 @@ class VelocityPlugin @Inject constructor(
 
     @Subscribe
     fun onProxyInitialization(event: ProxyInitializeEvent) {
-        plugin.loadConfig()
+        plugin.startup()
         CloudCommandHandler(createCommandManager(), plugin).createCloudCommand()
     }
 

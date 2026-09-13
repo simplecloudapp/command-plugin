@@ -8,7 +8,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 @ConfigSerializable
 data class MessageConfig(
     override val version: Int = ConfigVersion.VERSION,
-    public override val variables: Map<String, String> = mapOf("prefix" to "<#0EA5E9><bold>SC</bold> <#475569>|"),
+    override val variables: Map<String, String> = mapOf("prefix" to "<#0EA5E9><bold>SC</bold> <#475569>|"),
     val command: CommandSection = CommandSection()
 ) : VersionedConfig, AbstractMessageConfig()
 

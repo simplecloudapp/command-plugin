@@ -7,15 +7,12 @@ import java.nio.file.Path
 /**
  * @author Fynn Bauer in 2024
  */
-class CommandPlugin(
-    dirPath: Path
-) {
+class CommandPlugin(path: Path) {
 
-    val config = ConfigurationFactory(dirPath.resolve("messages.yml").toFile(), MessageConfig::class.java)
-    val messageConfiguration: MessageConfig
-        get() = config.get()
+    val config = ConfigurationFactory(path.resolve("messages.yml").toFile(), MessageConfig::class.java)
+    val messageConfiguration: MessageConfig get() = config.get()
 
-    fun loadConfig() {
+    fun startup() {
         config.loadOrCreate(MessageConfig())
     }
 

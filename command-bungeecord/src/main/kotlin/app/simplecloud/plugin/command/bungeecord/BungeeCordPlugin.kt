@@ -18,7 +18,7 @@ class BungeeCordPlugin : Plugin() {
     private val adventure = BungeeAudiences.create(this)
 
     override fun onEnable() {
-        plugin.loadConfig()
+        plugin.startup()
         CloudCommandHandler(createCommandManager(), plugin).createCloudCommand()
     }
 
