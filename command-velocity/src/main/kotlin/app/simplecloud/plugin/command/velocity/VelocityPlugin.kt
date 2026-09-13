@@ -47,7 +47,7 @@ class VelocityPlugin @Inject constructor(
         return VelocityCommandManager(
             server.pluginManager.ensurePluginContainer(this),
             server,
-            ExecutionCoordinator.simpleCoordinator(),
+            ExecutionCoordinator.asyncCoordinator(),
             SenderMapper.create(::VelocityCloudSender, VelocityCloudSender::getCommandSource)
         )
     }

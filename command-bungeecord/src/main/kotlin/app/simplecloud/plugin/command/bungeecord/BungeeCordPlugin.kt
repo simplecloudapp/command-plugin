@@ -33,7 +33,7 @@ class BungeeCordPlugin : Plugin() {
     private fun createCommandManager(): BungeeCommandManager<BungeeCloudSender> {
         return BungeeCommandManager(
             this,
-            ExecutionCoordinator.simpleCoordinator(),
+            ExecutionCoordinator.asyncCoordinator(),
             SenderMapper.create({ BungeeCloudSender(it, this) }, BungeeCloudSender::getCommandSender)
         )
     }
