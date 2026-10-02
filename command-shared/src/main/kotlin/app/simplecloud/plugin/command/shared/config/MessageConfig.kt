@@ -91,8 +91,8 @@ data class GroupStopSection(
 data class GroupErrorSection(
     val notFound: String = "<prefix> <#DC2626>Group <#F8FAFC><group> <#DC2626>was not found.",
     val alreadyEmpty: String = "<prefix> <#F59E0B>Group <#F8FAFC><group> <#F59E0B>has no running servers.",
-    val startFailed: String = "<prefix> <#DC2626>Could not start servers for group <#F8FAFC><group><#DC2626>.",
-    val stopFailed: String = "<prefix> <#DC2626>Could not stop servers of group <#F8FAFC><group><#DC2626>."
+    val startFailed: String = "<prefix> <#DC2626>Could not start servers for group <#F8FAFC><group><#DC2626>: <#F8FAFC><reason>",
+    val stopFailed: String = "<prefix> <#DC2626>Could not stop servers of group <#F8FAFC><group><#DC2626>: <#F8FAFC><reason>"
 )
 
 @ConfigSerializable
@@ -132,8 +132,8 @@ data class ServerStopSection(
 data class ServerErrorSection(
     val notFound: String = "<prefix> <#DC2626>Server <#F8FAFC><group> <id> <#DC2626>was not found.",
     val alreadyStopped: String = "<prefix> <#F59E0B>Server <#F8FAFC><group> <id> <#F59E0B>is already stopped.",
-    val startFailed: String = "<prefix> <#DC2626>Could not start server <#F8FAFC><group> <id><#DC2626>.",
-    val stopFailed: String = "<prefix> <#DC2626>Could not stop server <#F8FAFC><group> <id><#DC2626>."
+    val startFailed: String = "<prefix> <#DC2626>Failed to queue server start for group <#F8FAFC><group><#DC2626>: <#F8FAFC><reason>",
+    val stopFailed: String = "<prefix> <#DC2626>Could not stop server <#F8FAFC><group> <id><#DC2626>: <#F8FAFC><reason>"
 )
 
 @ConfigSerializable

@@ -6,6 +6,7 @@ import app.simplecloud.plugin.command.shared.command.CloudSender
 import app.simplecloud.plugin.command.shared.utilities.CommandPermissions
 import app.simplecloud.plugin.command.shared.CommandPlugin
 import app.simplecloud.plugin.command.shared.command.CloudSuggestions
+import app.simplecloud.plugin.command.shared.utilities.ApiUtils
 import app.simplecloud.plugin.command.shared.utilities.tags
 import kotlinx.coroutines.future.await
 import org.incendo.cloud.CommandManager
@@ -122,15 +123,13 @@ class ServerCommand<C : CloudSender>(
                             sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
                             return@suspendingHandler
                         }
-                        try {
-                            api.group().requestServerStart(group.serverGroupId).await()
-                            sender.sendMessage(messages.msg(messages.command.server.start.success, tags("group" to group.name, "id" to "?")))
-                        } catch (_: Exception) {
-                            api.group().requestServerStart(group).await()
-                            sender.sendMessage(messages.msg(messages.command.server.start.queued, tags("group" to group.name, "id" to "?")))
-                        }
-                    } catch (_: Exception) {
-                        sender.sendMessage(messages.msg(messages.command.server.error.startFailed, tags("group" to groupName, "id" to "?")))
+                        api.group().requestServerStart(group).await()
+                        sender.sendMessage(messages.msg(messages.command.server.start.success, tags("group" to group.name, "id" to "?")))
+                    } catch (e: Exception) {
+                        sender.sendMessage(messages.msg(
+                            messages.command.server.error.startFailed,
+                            tags("group" to groupName, "id" to "?", "reason" to ApiUtils.reason(e))
+                        ))
                     }
                 }
                 .permission(Permission.permission(CommandPermissions.SERVER_START))
@@ -162,8 +161,11 @@ class ServerCommand<C : CloudSender>(
                         }
                         api.server().stopServer(server.serverId).await()
                         sender.sendMessage(messages.msg(messages.command.server.stop.success, tags("group" to groupName, "id" to id)))
-                    } catch (_: Exception) {
-                        sender.sendMessage(messages.msg(messages.command.server.error.stopFailed, tags("group" to groupName, "id" to id)))
+                    } catch (e: Exception) {
+                        sender.sendMessage(messages.msg(
+                            messages.command.server.error.stopFailed,
+                            tags("group" to groupName, "id" to id, "reason" to ApiUtils.reason(e))
+                        ))
                     }
                 }
                 .permission(Permission.permission(CommandPermissions.SERVER_STOP))
