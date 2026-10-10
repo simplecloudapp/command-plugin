@@ -19,10 +19,11 @@ class BungeeCordPlugin : Plugin() {
 
     override fun onEnable() {
         plugin.startup()
-        CloudCommandHandler(createCommandManager(), plugin).createCloudCommand()
+        CloudCommandHandler(createCommandManager(), plugin).register()
     }
 
     override fun onDisable() {
+        plugin.shutdown()
         adventure.close()
     }
 

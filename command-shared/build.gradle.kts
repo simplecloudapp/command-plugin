@@ -1,5 +1,6 @@
 dependencies {
     compileOnly(libs.simplecloud.api)
+    compileOnly(libs.slf4j.api)
     implementation(libs.adventure.api)
     implementation(libs.adventure.text.minimessage)
     implementation(libs.simplecloud.plugin)
