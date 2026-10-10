@@ -89,7 +89,7 @@ class CloudCommandHandler<C : CloudSender>(
                 val message = if (cause is NumberParseException) {
                     messages.msg(messages.command.usage.invalidNumber, tags("value" to cause.input()))
                 } else {
-                    messages.msg(messages.command.error.failed, tags("reason" to (cause?.message ?: "Invalid argument")))
+                    messages.msg(messages.command.error.failed, tags("reason" to (cause.message ?: "Invalid argument")))
                 }
                 context.context().sender().sendMessage(message)
             }

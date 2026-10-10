@@ -68,22 +68,22 @@ data class GroupInfoSection(
 @ConfigSerializable
 data class GroupStartSection(
     val success: String = "<prefix> <#A3E635>Starting <#F8FAFC><count> servers <#A3E635>for group <#F8FAFC><group><#A3E635>.",
-    val partial: String = "<prefix> <#F59E0B>Started only <#F8FAFC><count>/<total> servers <#F59E0B>for group <#F8FAFC><group><#F59E0B>: <#F8FAFC><reason>"
+    val partial: String = "<prefix> <#F59E0B>Started only <#F8FAFC><count>/<total> servers <#F59E0B>for group <#F8FAFC><group> <#F59E0B>because <#F8FAFC><reason><#F59E0B>."
 )
 
 @ConfigSerializable
 data class GroupStopSection(
     val success: String = "<prefix> <#A3E635>Stopping servers of group <#F8FAFC><group><#A3E635>.",
     val successWithIds: String = "<prefix> <#A3E635>Stopping servers <#F8FAFC><ids> <#A3E635>of group <#F8FAFC><group><#A3E635>.",
-    val partial: String = "<prefix> <#F59E0B>Stopped only <#F8FAFC><count>/<total> servers <#F59E0B>of group <#F8FAFC><group><#F59E0B>: <#F8FAFC><reason>"
+    val partial: String = "<prefix> <#F59E0B>Stopped only <#F8FAFC><count>/<total> servers <#F59E0B>of group <#F8FAFC><group> <#F59E0B>because <#F8FAFC><reason><#F59E0B>."
 )
 
 @ConfigSerializable
 data class GroupErrorSection(
     val notFound: String = "<prefix> <#DC2626>Group <#F8FAFC><group> <#DC2626>was not found.",
     val alreadyEmpty: String = "<prefix> <#F59E0B>Group <#F8FAFC><group> <#F59E0B>has no running servers.",
-    val startFailed: String = "<prefix> <#DC2626>Could not start servers for group <#F8FAFC><group><#DC2626>: <#F8FAFC><reason>",
-    val stopFailed: String = "<prefix> <#DC2626>Could not stop servers of group <#F8FAFC><group><#DC2626>: <#F8FAFC><reason>"
+    val startFailed: String = "<prefix> <#DC2626>Could not start servers for group <#F8FAFC><group> <#DC2626>because <#F8FAFC><reason><#DC2626>.",
+    val stopFailed: String = "<prefix> <#DC2626>Could not stop servers of group <#F8FAFC><group> <#DC2626>because <#F8FAFC><reason><#DC2626>."
 )
 
 @ConfigSerializable
@@ -122,8 +122,8 @@ data class ServerStopSection(
 data class ServerErrorSection(
     val notFound: String = "<prefix> <#DC2626>Server <#F8FAFC><group> <id> <#DC2626>was not found.",
     val alreadyStopping: String = "<prefix> <#F59E0B>Server <#F8FAFC><group> <id> <#F59E0B>is already stopping.",
-    val startFailed: String = "<prefix> <#DC2626>Failed to queue server start for group <#F8FAFC><group><#DC2626>: <#F8FAFC><reason>",
-    val stopFailed: String = "<prefix> <#DC2626>Could not stop server <#F8FAFC><group> <id><#DC2626>: <#F8FAFC><reason>"
+    val startFailed: String = "<prefix> <#DC2626>Could not queue a new server for group <#F8FAFC><group> <#DC2626>because <#F8FAFC><reason><#DC2626>.",
+    val stopFailed: String = "<prefix> <#DC2626>Could not stop server <#F8FAFC><group> <id> <#DC2626>because <#F8FAFC><reason><#DC2626>."
 )
 
 @ConfigSerializable
@@ -183,5 +183,5 @@ data class ReloadSection(
 
 @ConfigSerializable
 data class ErrorSection(
-    val failed: String = "<prefix> <#DC2626>The command failed: <#F8FAFC><reason>"
+    val failed: String = "<prefix> <#DC2626>The command failed because <#F8FAFC><reason><#DC2626>."
 )
