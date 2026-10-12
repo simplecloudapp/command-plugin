@@ -1,6 +1,5 @@
 package app.simplecloud.plugin.command.shared.command
 
-import app.simplecloud.api.CloudApi
 import app.simplecloud.plugin.command.shared.utilities.CommandPermissions
 import app.simplecloud.plugin.command.shared.CommandPlugin
 import app.simplecloud.plugin.command.shared.command.commands.GroupCommand
@@ -22,7 +21,7 @@ class CloudCommandHandler<C : CloudSender>(
     private val manager: CommandManager<C>,
     private val plugin: CommandPlugin
 ) {
-    private val api = CloudApi.create()
+    private val api = plugin.api
 
     fun register() {
         manager.command(
@@ -87,7 +86,15 @@ class CloudCommandHandler<C : CloudSender>(
                 val messages = plugin.messageConfiguration
                 val cause = context.exception().cause
                 val message = if (cause is NumberParseException) {
-                    messages.msg(messages.command.usage.invalidNumber, tags("value" to cause.input()))
+                    // the parser also fails on valid numbers that are out of range
+                    val number = cause.input().toBigDecimalOrNull()
+                    val range = cause.range()
+                    when {
+                        number == null -> messages.msg(messages.command.usage.invalidNumber, tags("value" to cause.input()))
+                        number < range.min().toString().toBigDecimal() -> messages.msg(messages.command.usage.numberTooSmall, tags("min" to range.min()))
+                        number > range.max().toString().toBigDecimal() -> messages.msg(messages.command.usage.numberTooLarge, tags("max" to range.max()))
+                        else -> messages.msg(messages.command.usage.invalidNumber, tags("value" to cause.input()))
+                    }
                 } else {
                     messages.msg(messages.command.error.failed, tags("reason" to (cause.message ?: "Invalid argument")))
                 }

@@ -68,7 +68,7 @@ class GroupCommand<C : CloudSender>(
                     val sender = context.sender()
                     val groupName = context.get<String>("group")
                     val messages = plugin.messageConfiguration
-                    val group = api.group().getGroupByName(groupName).await()
+                    val group = api.group().allGroups.await().firstOrNull { it.name.equals(groupName, true) }
                     if (group == null) {
                         sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
                         return@suspendingHandler
@@ -97,7 +97,7 @@ class GroupCommand<C : CloudSender>(
                     val groupName = context.get<String>("group")
                     val count = context.getOrDefault("count", 1)
                     val messages = plugin.messageConfiguration
-                    val group = api.group().getGroupByName(groupName).await()
+                    val group = api.group().allGroups.await().firstOrNull { it.name.equals(groupName, true) }
                     if (group == null) {
                         sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
                         return@suspendingHandler
@@ -136,19 +136,24 @@ class GroupCommand<C : CloudSender>(
                     val groupName = context.get<String>("group")
                     val id = context.getOrDefault("id", null as Int?)
                     val messages = plugin.messageConfiguration
-                    val group = api.group().getGroupByName(groupName).await()
+                    val group = api.group().allGroups.await().firstOrNull { it.name.equals(groupName, true) }
                     if (group == null) {
                         sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
                         return@suspendingHandler
                     }
                     val servers = api.server().getServersByGroup(group.name).await()
-                    if (servers.isEmpty()) {
-                        sender.sendMessage(messages.msg(messages.command.group.error.alreadyEmpty, tags("group" to group.name)))
+                    val matching = if (id == null) servers else servers.filter { it.numericalId == id }
+                    if (id != null && matching.isEmpty()) {
+                        sender.sendMessage(messages.msg(messages.command.server.error.notFound, tags("group" to group.name, "id" to id)))
                         return@suspendingHandler
                     }
-                    val targets = if (id == null) servers else servers.filter { it.numericalId == id }
+                    val targets = matching.filter { it.state != ServerState.STOPPING && it.state != ServerState.CLEANUP }
                     if (targets.isEmpty()) {
-                        sender.sendMessage(messages.msg(messages.command.server.error.notFound, tags("group" to group.name, "id" to id)))
+                        if (id == null) {
+                            sender.sendMessage(messages.msg(messages.command.group.error.alreadyEmpty, tags("group" to group.name)))
+                        } else {
+                            sender.sendMessage(messages.msg(messages.command.server.error.alreadyStopping, tags("group" to group.name, "id" to id)))
+                        }
                         return@suspendingHandler
                     }
                     val results = coroutineScope {

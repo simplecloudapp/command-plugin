@@ -12,6 +12,8 @@ import app.simplecloud.plugin.command.shared.command.CloudSuggestions
 import app.simplecloud.plugin.command.shared.utilities.tags
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import net.kyori.adventure.text.Component
 import org.incendo.cloud.CommandManager
 import org.incendo.cloud.kotlin.coroutines.extension.suspendingHandler
@@ -50,11 +52,12 @@ class PlayerCommand<C : CloudSender>(
                         sender.sendMessage(messages.msg(messages.command.usage.invalidTargetType))
                         return@suspendingHandler
                     }
-                    if (!targetExists(targetType, target)) {
+                    val targetName = resolveTarget(targetType, target)
+                    if (targetName == null) {
                         sender.sendMessage(messages.msg(messages.command.player.error.targetNotFound, tags("target" to target)))
                         return@suspendingHandler
                     }
-                    val players = playersForTarget(targetType, target)
+                    val players = playersForTarget(targetType, targetName)
                     if (players.isEmpty()) {
                         sender.sendMessage(messages.msg(messages.command.player.list.empty))
                         return@suspendingHandler
@@ -123,6 +126,11 @@ class PlayerCommand<C : CloudSender>(
                         sender.sendMessage(messages.msg(messages.command.usage.invalidTargetType))
                         return@suspendingHandler
                     }
+                    // TODO: connect to groups when #20 is merged
+                    if (targetType.equals("group", true)) {
+                        sender.sendMessage(messages.msg(messages.command.player.error.groupTargetUnavailable))
+                        return@suspendingHandler
+                    }
                     val player = api.player().get(playerName).await()
                     if (player == null) {
                         sender.sendMessage(messages.msg(messages.command.player.error.notFound, tags("playername" to playerName)))
@@ -132,28 +140,29 @@ class PlayerCommand<C : CloudSender>(
                         sender.sendMessage(messages.msg(messages.command.player.error.notOnline, tags("playername" to player.name)))
                         return@suspendingHandler
                     }
-                    if (!targetExists(targetType, target)) {
+                    val targetName = resolveTarget(targetType, target)
+                    if (targetName == null) {
                         sender.sendMessage(messages.msg(messages.command.player.error.targetNotFound, tags("target" to target)))
                         return@suspendingHandler
                     }
-                    val result = player.connect(target).await()
+                    val result = player.connect(targetName).await()
                     when (result) {
                         ConnectResult.SUCCESS -> sender.sendMessage(
                             messages.msg(
                                 messages.command.player.send.success,
-                                tags("playername" to player.name, "displayname" to player.displayName, "target" to target)
+                                tags("playername" to player.name, "displayname" to player.displayName, "target" to targetName)
                             )
                         )
 
                         ConnectResult.ALREADY_CONNECTED -> sender.sendMessage(
                             messages.msg(
                                 messages.command.player.error.sameTarget,
-                                tags("playername" to player.name, "displayname" to player.displayName, "target" to target)
+                                tags("playername" to player.name, "displayname" to player.displayName, "target" to targetName)
                             )
                         )
 
                         ConnectResult.SERVER_NOT_FOUND -> sender.sendMessage(
-                            messages.msg(messages.command.player.error.targetNotFound, tags("target" to target))
+                            messages.msg(messages.command.player.error.targetNotFound, tags("target" to targetName))
                         )
 
                         ConnectResult.PLAYER_NOT_FOUND -> sender.sendMessage(
@@ -163,7 +172,7 @@ class PlayerCommand<C : CloudSender>(
                         else -> sender.sendMessage(
                             messages.msg(
                                 messages.command.player.error.sendFailed,
-                                tags("playername" to player.name, "displayname" to player.displayName, "target" to target)
+                                tags("playername" to player.name, "displayname" to player.displayName, "target" to targetName)
                             )
                         )
                     }
@@ -189,17 +198,28 @@ class PlayerCommand<C : CloudSender>(
                         sender.sendMessage(messages.msg(messages.command.usage.invalidTargetType))
                         return@suspendingHandler
                     }
-                    if (!targetExists(targetType, target)) {
+                    // TODO: connect to groups when #20 is merged
+                    if (targetType.equals("group", true)) {
+                        sender.sendMessage(messages.msg(messages.command.player.error.groupTargetUnavailable))
+                        return@suspendingHandler
+                    }
+                    val targetName = resolveTarget(targetType, target)
+                    if (targetName == null) {
                         sender.sendMessage(messages.msg(messages.command.player.error.targetNotFound, tags("target" to target)))
                         return@suspendingHandler
                     }
-                    val results = connectAll(api.player().onlinePlayers.await(), target)
+                    val players = api.player().onlinePlayers.await()
+                    if (players.isEmpty()) {
+                        sender.sendMessage(messages.msg(messages.command.player.error.noOnlinePlayers))
+                        return@suspendingHandler
+                    }
+                    val results = connectAll(players, targetName)
                     val sent = results.count { it == ConnectResult.SUCCESS }
                     when {
-                        sent > 0 -> sender.sendMessage(messages.msg(messages.command.player.send.successAll, tags("count" to sent, "target" to target)))
-                        results.isNotEmpty() && results.all { it == ConnectResult.ALREADY_CONNECTED } ->
-                            sender.sendMessage(messages.msg(messages.command.player.error.allOnTarget, tags("target" to target)))
-                        else -> sender.sendMessage(messages.msg(messages.command.player.error.sendAllFailed, tags("target" to target)))
+                        sent > 0 -> sender.sendMessage(messages.msg(messages.command.player.send.successAll, tags("count" to sent, "target" to targetName)))
+                        results.all { it == ConnectResult.ALREADY_CONNECTED } ->
+                            sender.sendMessage(messages.msg(messages.command.player.error.allOnTarget, tags("target" to targetName)))
+                        else -> sender.sendMessage(messages.msg(messages.command.player.error.sendAllFailed, tags("target" to targetName)))
                     }
                 }
                 .permission(Permission.permission(CommandPermissions.PLAYER_SEND))
@@ -225,18 +245,24 @@ class PlayerCommand<C : CloudSender>(
                         sender.sendMessage(messages.msg(messages.command.usage.invalidTargetType))
                         return@suspendingHandler
                     }
-                    if (!targetExists(targetType, target)) {
+                    // TODO: connect to groups when #20 is merged
+                    if (targetType.equals("group", true)) {
+                        sender.sendMessage(messages.msg(messages.command.player.error.groupTargetUnavailable))
+                        return@suspendingHandler
+                    }
+                    val targetName = resolveTarget(targetType, target)
+                    if (targetName == null) {
                         sender.sendMessage(messages.msg(messages.command.player.error.targetNotFound, tags("target" to target)))
                         return@suspendingHandler
                     }
                     val sourceKey = source.lowercase()
-                    val sourceIdentifiers = api.server().allServers.await()
-                        .asSequence()
+                    val serverSources = api.server().allServers.await()
+                        .filter { sourceKey in serverIdentifiers(it) || (it.group?.name ?: it.serverGroupId).equals(source, true) }
                         .map { serverIdentifiers(it) }
-                        .plus(api.persistentServer().allPersistentServers.await().map { serverIdentifiers(it) })
+                    val persistentServerSources = api.persistentServer().allPersistentServers.await()
+                        .map { serverIdentifiers(it) }
                         .filter { sourceKey in it }
-                        .flatten()
-                        .toSet()
+                    val sourceIdentifiers = (serverSources + persistentServerSources).flatten().toSet()
                     if (sourceIdentifiers.isEmpty()) {
                         sender.sendMessage(messages.msg(messages.command.player.error.sourceNotFound, tags("source" to source)))
                         return@suspendingHandler
@@ -246,13 +272,13 @@ class PlayerCommand<C : CloudSender>(
                         sender.sendMessage(messages.msg(messages.command.player.error.noSourcePlayers, tags("source" to source)))
                         return@suspendingHandler
                     }
-                    val results = connectAll(players, target)
+                    val results = connectAll(players, targetName)
                     val sent = results.count { it == ConnectResult.SUCCESS }
                     when {
-                        sent > 0 -> sender.sendMessage(messages.msg(messages.command.player.send.successFromServer, tags("count" to sent, "source" to source, "target" to target)))
+                        sent > 0 -> sender.sendMessage(messages.msg(messages.command.player.send.successFromServer, tags("count" to sent, "source" to source, "target" to targetName)))
                         results.all { it == ConnectResult.ALREADY_CONNECTED } ->
-                            sender.sendMessage(messages.msg(messages.command.player.error.allOnTarget, tags("target" to target)))
-                        else -> sender.sendMessage(messages.msg(messages.command.player.error.sendAllFailed, tags("target" to target)))
+                            sender.sendMessage(messages.msg(messages.command.player.error.allOnTarget, tags("target" to targetName)))
+                        else -> sender.sendMessage(messages.msg(messages.command.player.error.sendAllFailed, tags("target" to targetName)))
                     }
                 }
                 .permission(Permission.permission(CommandPermissions.PLAYER_SEND))
@@ -294,19 +320,19 @@ class PlayerCommand<C : CloudSender>(
         return targetType.equals("group", true) || targetType.equals("ps", true)
     }
 
-    private suspend fun targetExists(targetType: String, target: String): Boolean {
+    private suspend fun resolveTarget(targetType: String, target: String): String? {
         return when {
-            targetType.equals("group", true) -> api.group().getGroupByName(target).await() != null
-            targetType.equals("ps", true) -> api.persistentServer().getPersistentServerByName(target).await() != null
-            else -> false
+            targetType.equals("group", true) -> api.group().allGroups.await().firstOrNull { it.name.equals(target, true) }?.name
+            targetType.equals("ps", true) -> api.persistentServer().allPersistentServers.await().firstOrNull { it.name.equals(target, true) }?.name
+            else -> null
         }
     }
 
-    private suspend fun playersForTarget(targetType: String, target: String): List<CloudPlayer> {
+    private suspend fun playersForTarget(targetType: String, targetName: String): List<CloudPlayer> {
         if (targetType.equals("group", true)) {
-            return playersOn(api.server().getServersByGroup(target).await().flatMap { serverIdentifiers(it) }.toSet())
+            return playersOn(api.server().getServersByGroup(targetName).await().flatMap { serverIdentifiers(it) }.toSet())
         }
-        val persistentServer = api.persistentServer().getPersistentServerByName(target).await() ?: return emptyList()
+        val persistentServer = api.persistentServer().allPersistentServers.await().firstOrNull { it.name == targetName } ?: return emptyList()
         return playersOn(serverIdentifiers(persistentServer))
     }
 
@@ -314,7 +340,9 @@ class PlayerCommand<C : CloudSender>(
         api.player().onlinePlayers.await().filter { it.connectedServerName?.lowercase() in identifiers }
 
     private suspend fun connectAll(players: List<CloudPlayer>, target: String): List<ConnectResult?> = coroutineScope {
-        players.map { player -> async { runCatching { player.connect(target).await() }.getOrNull() } }.awaitAll()
+        // every connect blocks an api thread for up to 30 seconds, so only a few run at the same time
+        val permits = Semaphore(MAX_PARALLEL_CONNECTS)
+        players.map { player -> async { permits.withPermit { runCatching { player.connect(target).await() }.getOrNull() } } }.awaitAll()
     }
 
     private fun serverIdentifiers(server: Server): Set<String> {
@@ -322,7 +350,7 @@ class PlayerCommand<C : CloudSender>(
         val numbered = if (groupName.isNullOrBlank()) {
             emptyList()
         } else {
-            listOf("$groupName ${server.numericalId}", "$groupName-${server.numericalId}")
+            listOf("$groupName-${server.numericalId}")
         }
         return (listOfNotNull(server.serverId, server.persistentServerId, server.persistentServer?.name) + numbered)
             .filter { it.isNotBlank() }
@@ -335,4 +363,8 @@ class PlayerCommand<C : CloudSender>(
             .filter { it.isNotBlank() }
             .map { it.lowercase() }
             .toSet()
+
+    companion object {
+        private const val MAX_PARALLEL_CONNECTS = 4
+    }
 }

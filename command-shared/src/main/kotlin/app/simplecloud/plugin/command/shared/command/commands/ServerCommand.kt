@@ -42,7 +42,12 @@ class ServerCommand<C : CloudSender>(
                     val servers = if (groupName == null) {
                         api.server().allServers.await()
                     } else {
-                        api.server().getServersByGroup(groupName).await()
+                        val group = api.group().allGroups.await().firstOrNull { it.name.equals(groupName, true) }
+                        if (group == null) {
+                            sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
+                            return@suspendingHandler
+                        }
+                        api.server().getServersByGroup(group.name).await()
                     }
                     if (servers.isEmpty()) {
                         sender.sendMessage(messages.msg(messages.command.server.list.empty))
@@ -84,12 +89,17 @@ class ServerCommand<C : CloudSender>(
                     val groupName = context.get<String>("group")
                     val id = context.get<Int>("id")
                     val messages = plugin.messageConfiguration
-                    val server = api.server().getServerByNumericalId(groupName, id).await()
-                    if (server == null) {
-                        sender.sendMessage(messages.msg(messages.command.server.error.notFound, tags("group" to groupName, "id" to id)))
+                    val group = api.group().allGroups.await().firstOrNull { it.name.equals(groupName, true) }
+                    if (group == null) {
+                        sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
                         return@suspendingHandler
                     }
-                    val serverName = "$groupName $id"
+                    val server = api.server().getServersByGroup(group.name).await().firstOrNull { it.numericalId == id }
+                    if (server == null) {
+                        sender.sendMessage(messages.msg(messages.command.server.error.notFound, tags("group" to group.name, "id" to id)))
+                        return@suspendingHandler
+                    }
+                    val serverName = "${group.name} $id"
                     sender.sendMessage(messages.msg(messages.command.server.info.title, tags("server" to serverName)))
                     sender.sendMessage(messages.msg(messages.command.server.info.entry, tags("key" to "State", "value" to server.state.name)))
                     sender.sendMessage(messages.msg(messages.command.server.info.entry, tags("key" to "Memory", "value" to "${server.minMemory}-${server.maxMemory} MB")))
@@ -110,7 +120,7 @@ class ServerCommand<C : CloudSender>(
                     val sender = context.sender()
                     val groupName = context.get<String>("group")
                     val messages = plugin.messageConfiguration
-                    val group = api.group().getGroupByName(groupName).await()
+                    val group = api.group().allGroups.await().firstOrNull { it.name.equals(groupName, true) }
                     if (group == null) {
                         sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
                         return@suspendingHandler
@@ -141,21 +151,26 @@ class ServerCommand<C : CloudSender>(
                     val groupName = context.get<String>("group")
                     val id = context.get<Int>("id")
                     val messages = plugin.messageConfiguration
-                    val server = api.server().getServerByNumericalId(groupName, id).await()
+                    val group = api.group().allGroups.await().firstOrNull { it.name.equals(groupName, true) }
+                    if (group == null) {
+                        sender.sendMessage(messages.msg(messages.command.group.error.notFound, tags("group" to groupName)))
+                        return@suspendingHandler
+                    }
+                    val server = api.server().getServersByGroup(group.name).await().firstOrNull { it.numericalId == id }
                     if (server == null) {
-                        sender.sendMessage(messages.msg(messages.command.server.error.notFound, tags("group" to groupName, "id" to id)))
+                        sender.sendMessage(messages.msg(messages.command.server.error.notFound, tags("group" to group.name, "id" to id)))
                         return@suspendingHandler
                     }
                     if (server.state == ServerState.STOPPING || server.state == ServerState.CLEANUP) {
-                        sender.sendMessage(messages.msg(messages.command.server.error.alreadyStopping, tags("group" to groupName, "id" to id)))
+                        sender.sendMessage(messages.msg(messages.command.server.error.alreadyStopping, tags("group" to group.name, "id" to id)))
                         return@suspendingHandler
                     }
                     runCatching { api.server().stopServer(server.serverId).await() }
-                        .onSuccess { sender.sendMessage(messages.msg(messages.command.server.stop.success, tags("group" to groupName, "id" to id))) }
+                        .onSuccess { sender.sendMessage(messages.msg(messages.command.server.stop.success, tags("group" to group.name, "id" to id))) }
                         .onFailure {
                             sender.sendMessage(messages.msg(
                                 messages.command.server.error.stopFailed,
-                                tags("group" to groupName, "id" to id, "reason" to ApiUtils.reason(it))
+                                tags("group" to group.name, "id" to id, "reason" to ApiUtils.reason(it))
                             ))
                         }
                 }

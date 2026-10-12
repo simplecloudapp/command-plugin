@@ -1,5 +1,6 @@
 package app.simplecloud.plugin.command.shared
 
+import app.simplecloud.api.CloudApi
 import app.simplecloud.plugin.api.shared.config.ConfigurationFactory
 import app.simplecloud.plugin.command.shared.config.MessageConfig
 import kotlinx.coroutines.*
@@ -15,6 +16,8 @@ class CommandPlugin(path: Path) {
 
     val config = ConfigurationFactory(path.resolve("messages.yml").toFile(), MessageConfig::class.java)
     val messageConfiguration: MessageConfig get() = config.get()
+
+    val api = CloudApi.create()
 
     // coroutine scope used for commands
     val scope = CoroutineScope(
@@ -32,6 +35,7 @@ class CommandPlugin(path: Path) {
 
     fun shutdown() {
         scope.cancel()
+        api.close()
     }
 
 }

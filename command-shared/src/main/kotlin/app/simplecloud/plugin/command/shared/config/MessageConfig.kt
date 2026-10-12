@@ -27,7 +27,7 @@ data class CommandSection(
 @ConfigSerializable
 data class HelpSection(
     val title: String = "<prefix> <#0EA5E9>SimpleCloud commands",
-    val entry: String = "<#E2E8F0><command>",
+    val entry: String = "<#E2E8F0> <command>",
     val empty: String = "<prefix> <#F59E0B>No commands are available for you."
 )
 
@@ -35,6 +35,8 @@ data class HelpSection(
 data class UsageSection(
     val invalid: String = "<prefix> <#DC2626>Use <#F8FAFC><command> <#DC2626>instead.",
     val invalidNumber: String = "<prefix> <#DC2626><#F8FAFC><value> <#DC2626>is not a valid number.",
+    val numberTooSmall: String = "<prefix> <#DC2626>The number must be at least <#F8FAFC><min><#DC2626>.",
+    val numberTooLarge: String = "<prefix> <#DC2626>The number must be at most <#F8FAFC><max><#DC2626>.",
     val invalidTargetType: String = "<prefix> <#DC2626>Use <#F8FAFC>group <#DC2626>or <#F8FAFC>ps <#DC2626>as target type."
 )
 
@@ -169,6 +171,8 @@ data class PlayerErrorSection(
     val sourceNotFound: String = "<prefix> <#DC2626>Source <#F8FAFC><source> <#DC2626>was not found.",
     val sendFailed: String = "<prefix> <#DC2626>Could not send <white><head:<playername>:true> <#F8FAFC><displayname> <#DC2626>to <#F8FAFC><target><#DC2626>.",
     val sendAllFailed: String = "<prefix> <#DC2626>Could not send players to <#F8FAFC><target><#DC2626>.",
+    val groupTargetUnavailable: String = "<prefix> <#F59E0B>Sending players to a group is currently unavailable. Use <#F8FAFC>ps <#F59E0B>instead.",
+    val noOnlinePlayers: String = "<prefix> <#F59E0B>No players are online.",
     val allOnTarget: String = "<prefix> <#F59E0B>All players are already on <#F8FAFC><target><#F59E0B>.",
     val noSourcePlayers: String = "<prefix> <#F59E0B>No players were found on <#F8FAFC><source><#F59E0B>.",
     val messageEmpty: String = "<prefix> <#DC2626>Write a message for <#F8FAFC><playername><#DC2626>.",

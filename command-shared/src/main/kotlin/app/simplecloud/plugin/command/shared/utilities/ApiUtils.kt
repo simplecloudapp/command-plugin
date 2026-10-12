@@ -2,18 +2,22 @@ package app.simplecloud.plugin.command.shared.utilities
 
 import app.simplecloud.api.web.ApiException
 import app.simplecloud.api.web.models.ModelsErrorResponse
+import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeoutException
 
 object ApiUtils {
 
-    /**
-     * Returns the reason of a failed api call.
-     */
-    fun reason(throwable: Throwable): String {
-        val apiException = generateSequence(throwable) { it.cause }
-            .filterIsInstance<ApiException>()
-            .firstOrNull()
+    private val logger = LoggerFactory.getLogger(ApiUtils::class.java)
 
-        if (apiException == null) return "an internal error occurred"
+    fun reason(throwable: Throwable): String {
+        val causes = generateSequence(throwable) { it.cause }
+        val apiException = causes.filterIsInstance<ApiException>().firstOrNull()
+
+        if (apiException == null) {
+            if (causes.any { it is TimeoutException }) return "the controller did not respond in time"
+            logger.error("An unexpected error occurred while executing a command", throwable)
+            return "an internal error occurred"
+        }
         if (apiException.code == 0) return "the controller is not reachable"
         return parseErrorMessage(apiException.responseBody)
     }
