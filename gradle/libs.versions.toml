@@ -1,20 +1,22 @@
 [versions]
-kotlin = "2.4.10"
+kotlin = "2.4.21"
 kotlinx-coroutines = "1.11.0"
 
-shadow = "9.5.1"
+shadow = "9.6.1"
 minotaur = "2.9.0"
 blossom = "2.2.0"
 
-simplecloud-api = "0.1.0-platform.40"
+simplecloud-api = "0.1.0-platform.58-dev.5.1-fe01ce5"
 simplecloud-plugin = "0.0.1-platform.1778966459069-b1e45e2"
+
+slf4j = "2.0.20"
 
 velocity = "4.1.0-SNAPSHOT"
 bungeecord-api = "1.21-R0.4"
 
-cloud-core = "2.0.0"
-cloud-velocity = "2.0.0-beta.10"
-cloud-bungeecord = "2.0.0-beta.10"
+cloud-core = "2.1.0"
+cloud-velocity = "2.0.0"
+cloud-bungeecord = "2.0.0"
 
 adventure-api = "5.2.0"
 adventure-platform-bungeecord = "4.4.1"
@@ -42,6 +44,8 @@ adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", 
 
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 configurate-kotlin = { module = "org.spongepowered:configurate-extra-kotlin", version.ref = "configurate" }
+
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [bundles]
 configurate = ["configurate-kotlin", "configurate-yaml"]

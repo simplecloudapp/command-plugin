@@ -18,11 +18,12 @@ class BungeeCordPlugin : Plugin() {
     private val adventure = BungeeAudiences.create(this)
 
     override fun onEnable() {
-        plugin.loadConfig()
-        CloudCommandHandler(createCommandManager(), plugin).createCloudCommand()
+        plugin.startup()
+        CloudCommandHandler(createCommandManager(), plugin).register()
     }
 
     override fun onDisable() {
+        plugin.shutdown()
         adventure.close()
     }
 
@@ -33,7 +34,7 @@ class BungeeCordPlugin : Plugin() {
     private fun createCommandManager(): BungeeCommandManager<BungeeCloudSender> {
         return BungeeCommandManager(
             this,
-            ExecutionCoordinator.simpleCoordinator(),
+            ExecutionCoordinator.asyncCoordinator(),
             SenderMapper.create({ BungeeCloudSender(it, this) }, BungeeCloudSender::getCommandSender)
         )
     }

@@ -1,22 +1,41 @@
 package app.simplecloud.plugin.command.shared
 
+import app.simplecloud.api.CloudApi
 import app.simplecloud.plugin.api.shared.config.ConfigurationFactory
 import app.simplecloud.plugin.command.shared.config.MessageConfig
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
 /**
  * @author Fynn Bauer in 2024
  */
-class CommandPlugin(
-    dirPath: Path
-) {
+class CommandPlugin(path: Path) {
 
-    val config = ConfigurationFactory(dirPath.resolve("messages.yml").toFile(), MessageConfig::class.java)
-    val messageConfiguration: MessageConfig
-        get() = config.get()
+    private val logger = LoggerFactory.getLogger(CommandPlugin::class.java)
 
-    fun loadConfig() {
+    val config = ConfigurationFactory(path.resolve("messages.yml").toFile(), MessageConfig::class.java)
+    val messageConfiguration: MessageConfig get() = config.get()
+
+    val api = CloudApi.create()
+
+    // coroutine scope used for commands
+    val scope = CoroutineScope(
+        CoroutineName("simplecloud-command") +
+                SupervisorJob() +
+                Dispatchers.IO +
+                CoroutineExceptionHandler { context, exception ->
+                    logger.error("An error occurred in coroutine ${context[CoroutineName]?.name}", exception)
+                }
+    )
+
+    fun startup() {
         config.loadOrCreate(MessageConfig())
+    }
+
+    fun shutdown() {
+        scope.cancel()
+        api.close()
     }
 
 }

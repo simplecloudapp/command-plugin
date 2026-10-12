@@ -8,13 +8,12 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 @ConfigSerializable
 data class MessageConfig(
     override val version: Int = ConfigVersion.VERSION,
-    public override val variables: Map<String, String> = mapOf("prefix" to "<#0EA5E9><bold>SC</bold> <#475569>|"),
+    override val variables: Map<String, String> = mapOf("prefix" to "<#0EA5E9><bold>SC</bold> <#475569>|"),
     val command: CommandSection = CommandSection()
 ) : VersionedConfig, AbstractMessageConfig()
 
 @ConfigSerializable
 data class CommandSection(
-    val format: FormatSection = FormatSection(),
     val help: HelpSection = HelpSection(),
     val usage: UsageSection = UsageSection(),
     val permission: PermissionSection = PermissionSection(),
@@ -26,25 +25,18 @@ data class CommandSection(
 )
 
 @ConfigSerializable
-data class FormatSection(
-    val infoEntry: String = "   <#94A3B8><key><#475569>: <#E2E8F0><value>",
-    val listEntry: String = "   <#475569>- <#F8FAFC><name> <#475569>(<#E2E8F0><value><#475569>)",
-    val playerEntry: String = "   <#475569>- <white><head:<playername>:true> <#F8FAFC><displayname> <#475569>(<#E2E8F0><value><#475569>)"
-)
-
-@ConfigSerializable
 data class HelpSection(
     val title: String = "<prefix> <#0EA5E9>SimpleCloud commands",
-    val entry: String = "<#E2E8F0><command>",
+    val entry: String = "<#E2E8F0> <command>",
     val empty: String = "<prefix> <#F59E0B>No commands are available for you."
 )
 
 @ConfigSerializable
 data class UsageSection(
     val invalid: String = "<prefix> <#DC2626>Use <#F8FAFC><command> <#DC2626>instead.",
-    val entry: String = "<#E2E8F0><command>",
-    val missingArgument: String = "<prefix> <#DC2626>Missing argument <#F8FAFC><argument><#DC2626>.",
     val invalidNumber: String = "<prefix> <#DC2626><#F8FAFC><value> <#DC2626>is not a valid number.",
+    val numberTooSmall: String = "<prefix> <#DC2626>The number must be at least <#F8FAFC><min><#DC2626>.",
+    val numberTooLarge: String = "<prefix> <#DC2626>The number must be at most <#F8FAFC><max><#DC2626>.",
     val invalidTargetType: String = "<prefix> <#DC2626>Use <#F8FAFC>group <#DC2626>or <#F8FAFC>ps <#DC2626>as target type."
 )
 
@@ -65,7 +57,7 @@ data class GroupSection(
 @ConfigSerializable
 data class GroupListSection(
     val title: String = "<prefix> <#0EA5E9>Groups <#475569>(<#E2E8F0><count><#475569>)",
-    val entry: String = "   <#475569>- <#F8FAFC><group> <#475569>(<#E2E8F0><value><#475569>)",
+    val entry: String = "   <#475569>- <#F8FAFC><group> <#475569>(<#E2E8F0><online>/<total> online<#475569>)",
     val empty: String = "<prefix> <#F59E0B>No groups were found."
 )
 
@@ -78,21 +70,22 @@ data class GroupInfoSection(
 @ConfigSerializable
 data class GroupStartSection(
     val success: String = "<prefix> <#A3E635>Starting <#F8FAFC><count> servers <#A3E635>for group <#F8FAFC><group><#A3E635>.",
-    val queued: String = "<prefix> <#0EA5E9>Start request for group <#F8FAFC><group> <#0EA5E9>was queued."
+    val partial: String = "<prefix> <#F59E0B>Started only <#F8FAFC><count>/<total> servers <#F59E0B>for group <#F8FAFC><group> <#F59E0B>because <#F8FAFC><reason><#F59E0B>."
 )
 
 @ConfigSerializable
 data class GroupStopSection(
     val success: String = "<prefix> <#A3E635>Stopping servers of group <#F8FAFC><group><#A3E635>.",
-    val successWithIds: String = "<prefix> <#A3E635>Stopping servers <#F8FAFC><ids> <#A3E635>of group <#F8FAFC><group><#A3E635>."
+    val successWithIds: String = "<prefix> <#A3E635>Stopping servers <#F8FAFC><ids> <#A3E635>of group <#F8FAFC><group><#A3E635>.",
+    val partial: String = "<prefix> <#F59E0B>Stopped only <#F8FAFC><count>/<total> servers <#F59E0B>of group <#F8FAFC><group> <#F59E0B>because <#F8FAFC><reason><#F59E0B>."
 )
 
 @ConfigSerializable
 data class GroupErrorSection(
     val notFound: String = "<prefix> <#DC2626>Group <#F8FAFC><group> <#DC2626>was not found.",
     val alreadyEmpty: String = "<prefix> <#F59E0B>Group <#F8FAFC><group> <#F59E0B>has no running servers.",
-    val startFailed: String = "<prefix> <#DC2626>Could not start servers for group <#F8FAFC><group><#DC2626>.",
-    val stopFailed: String = "<prefix> <#DC2626>Could not stop servers of group <#F8FAFC><group><#DC2626>."
+    val startFailed: String = "<prefix> <#DC2626>Could not start servers for group <#F8FAFC><group> <#DC2626>because <#F8FAFC><reason><#DC2626>.",
+    val stopFailed: String = "<prefix> <#DC2626>Could not stop servers of group <#F8FAFC><group> <#DC2626>because <#F8FAFC><reason><#DC2626>."
 )
 
 @ConfigSerializable
@@ -119,8 +112,7 @@ data class ServerInfoSection(
 
 @ConfigSerializable
 data class ServerStartSection(
-    val success: String = "<prefix> <#A3E635>Starting server <#F8FAFC><group> <id><#A3E635>.",
-    val queued: String = "<prefix> <#0EA5E9>Start request for server <#F8FAFC><group> <id> <#0EA5E9>was queued."
+    val requested: String = "<prefix> <#A3E635>Queued a new server for group <#F8FAFC><group><#A3E635>."
 )
 
 @ConfigSerializable
@@ -131,9 +123,9 @@ data class ServerStopSection(
 @ConfigSerializable
 data class ServerErrorSection(
     val notFound: String = "<prefix> <#DC2626>Server <#F8FAFC><group> <id> <#DC2626>was not found.",
-    val alreadyStopped: String = "<prefix> <#F59E0B>Server <#F8FAFC><group> <id> <#F59E0B>is already stopped.",
-    val startFailed: String = "<prefix> <#DC2626>Could not start server <#F8FAFC><group> <id><#DC2626>.",
-    val stopFailed: String = "<prefix> <#DC2626>Could not stop server <#F8FAFC><group> <id><#DC2626>."
+    val alreadyStopping: String = "<prefix> <#F59E0B>Server <#F8FAFC><group> <id> <#F59E0B>is already stopping.",
+    val startFailed: String = "<prefix> <#DC2626>Could not queue a new server for group <#F8FAFC><group> <#DC2626>because <#F8FAFC><reason><#DC2626>.",
+    val stopFailed: String = "<prefix> <#DC2626>Could not stop server <#F8FAFC><group> <id> <#DC2626>because <#F8FAFC><reason><#DC2626>."
 )
 
 @ConfigSerializable
@@ -179,6 +171,9 @@ data class PlayerErrorSection(
     val sourceNotFound: String = "<prefix> <#DC2626>Source <#F8FAFC><source> <#DC2626>was not found.",
     val sendFailed: String = "<prefix> <#DC2626>Could not send <white><head:<playername>:true> <#F8FAFC><displayname> <#DC2626>to <#F8FAFC><target><#DC2626>.",
     val sendAllFailed: String = "<prefix> <#DC2626>Could not send players to <#F8FAFC><target><#DC2626>.",
+    val groupTargetUnavailable: String = "<prefix> <#F59E0B>Sending players to a group is currently unavailable. Use <#F8FAFC>ps <#F59E0B>instead.",
+    val noOnlinePlayers: String = "<prefix> <#F59E0B>No players are online.",
+    val allOnTarget: String = "<prefix> <#F59E0B>All players are already on <#F8FAFC><target><#F59E0B>.",
     val noSourcePlayers: String = "<prefix> <#F59E0B>No players were found on <#F8FAFC><source><#F59E0B>.",
     val messageEmpty: String = "<prefix> <#DC2626>Write a message for <#F8FAFC><playername><#DC2626>.",
     val messageFailed: String = "<prefix> <#DC2626>Could not send the message to <#F8FAFC><playername><#DC2626>."
@@ -192,7 +187,5 @@ data class ReloadSection(
 
 @ConfigSerializable
 data class ErrorSection(
-    val internal: String = "<prefix> <#DC2626>An internal error occurred. Try again later.",
-    val cloudUnavailable: String = "<prefix> <#DC2626>The cloud service is currently unavailable.",
-    val targetUnavailable: String = "<prefix> <#DC2626>Target <#F8FAFC><target> <#DC2626>is currently unavailable."
+    val failed: String = "<prefix> <#DC2626>The command failed because <#F8FAFC><reason><#DC2626>."
 )
